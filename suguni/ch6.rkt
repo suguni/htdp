@@ -138,3 +138,70 @@
 ;; A three-letters-word is a structure:
 (define-struct three-letters-word (first-letter second-letter third-letter))
 ;; where first-letter, second-letter and third-letter are symbols.
+
+;; ch 6.5
+;; 복합데이터를 다룰때 디자인 레시피(디자인 프로세스)
+
+;; ex 6.5.1
+;; struct 정의는 ex 6.3.1에서 했음
+
+;; movie
+;; (define (process-movie a-movie)
+;;   ... (movie-title a-movie) ...
+;;   ... (movie-producer a-movie) ... )
+
+;; boyfriend
+;; (define (process-boyfriend a-boyfriend)
+;;   ... (boyfriend-name a-boyfriend) ...
+;;   ... (boyfriend-hair a-boyfriend) ...
+;;   ... (boyfriend-eyes a-boyfriend) ...
+;;   ... (boyfriend-phone a-boyfriend) ...)
+
+;; cheerleader
+;; (define (process-cheerleader a-cheerleader)
+;;   ... (cheerleader-name a-cheerleader) ...
+;;   ... (cheerleader-number a-cheerleader) ...)
+
+;; CD
+;; (define (process-CD a-CD)
+;;   ... (CD-artist a-CD) ...
+;;   ... (CD-title a-CD) ...
+;;   ... (CD-price a-CD) ...)
+
+;; sweater
+;; (define (process-sweater a-sweater)
+;;   ... (sweater-material a-sweater) ...
+;;   ... (sweater-size a-sweater) ...
+;;   ... (sweater-producer a-sweater) ...)
+
+;; ex 6.5.2
+
+;; Data Analysis & Definitions:
+(define-struct time (hours minutes seconds))
+;; A time is a structure: (make-time h m s) where h, m, and s are numbers.
+
+;; Template:
+;; (define (process-time a-time)
+;;   ... (time-hours a-time) ...
+;;   ... (time-minutes a-time) ...
+;;   ... (time-seconds a-time) ...)
+
+;; Purpose: time 구조체가 나타내는 시간까지 경과한 초를 계산한다.
+;; Contract: time-seconds : time -> number
+
+;; Examples:
+;; (time->seconds (make-time 12 30 2))
+;; =
+;; 45002
+
+;; Definition:
+(define (time->seconds t)
+  (+ (* (time-hours t) 60 60)
+     (* (time-minutes t) 60)
+     (time-seconds t)))
+
+;; Tests:
+(time->seconds (make-time 12 30 2))
+;; expected value:
+45002
+

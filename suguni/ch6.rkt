@@ -205,3 +205,5 @@
 ;; expected value:
 45002
 
+;; ch 6.6 -> ch6.6.rkt
+;; ch 6.7 -> ch6.7.rkt

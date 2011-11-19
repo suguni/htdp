@@ -181,7 +181,7 @@
      (* height (perimeter-of-disk radius))))
 ;; (* height (perimeter-of-disk radius))-원통의 옆면 너비, 이것도 다른 함수로 만들어야 할까?
 
-;; ex 3.3.4
+;; ex 3.3.4 - 다시짜기
 ;; area-of-disk, perimeter-of-disk는 앞에서 정의되어 있음
 (define (area-of-ring outer inner)
   (- (area-of-disk outer)

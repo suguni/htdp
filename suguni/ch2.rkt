@@ -34,7 +34,7 @@
 
 ;; ex 2.2.4
 (define (convert3 a b c)
-  (+ a (* b 10) (* b 100)))
+  (+ a (* b 10) (* c 100)))
 (convert3 3 2 1)
 
 ;; ex 2.2.5
@@ -69,8 +69,9 @@
   (* income 0.15))
 (tax 100) ;; 15
 (define (netpay h)
-  (* h 12))
-(netpay 10) ;; 120
+  (- (wage h) (tax (wage h))))
+'netpay
+(netpay 10) ;; 102
 
 ;; ex 2.3.2
 (define (sum-coins penny nickel dime quater)

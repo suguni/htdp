@@ -95,3 +95,106 @@
 
 ;; ex 10.1.6
 ;; name-robot : list-of-symbols -> list-of-symbols
+(define (name-robot los)
+  (cond
+    [(empty? los) empty]
+    [else
+     (cons
+      (cond
+        [(symbol=? (first los) 'robot) 'r2d2]
+        [else (first los)])
+      (name-robot (rest los)))]))
+;; test
+;(name-robot empty) ;; empty
+;(name-robot (cons 'kitty empty)) ;; (cons 'kitty empty)
+;(name-robot (cons 'kitty (cons 'robot (cons 'mazinga (cons 'robot empty)))))
+;; => (cons 'kitty (cons 'r2d2 (cons 'mazinga (cons 'r2d2 empty))))
+
+;; substitute : symbol symbol list-of-symbols -> list-of-symbols
+(define (substitute new old los)
+  (cond
+    [(empty? los) empty]
+    [else
+     (cons
+      (cond
+        [(symbol=? (first los) old) new]
+        [else (first los)])
+      (substitute new old (rest los)))]))
+
+;; test
+;(substitute 'r2d2 'robot empty) ;; empty
+;(substitute 'magic 'kitty (cons 'kitty empty)) ;; (cons 'magic empty)
+;(substitute 'r2d2 'mazinga (cons 'kitty (cons 'robot (cons 'mazinga (cons 'robot empty)))))
+;; => (cons 'kitty (cons 'robot (cons 'r2d2 (cons 'robot empty))))
+
+;; ex 10.1.7
+;; recall : symbol list-of-symbols -> list-of-symbols
+(define (recall ty lon)
+  (cond
+    [(empty? lon) empty]
+    [else
+     (cond 
+       [(symbol=? (first lon) ty) (recall ty (rest lon))]
+       [else (cons (first lon) (recall ty (rest lon)))])]))
+
+;; test
+;; (recall 'robot (cons 'robot (cons 'doll (cons 'dress empty))))
+;; => (cons 'doll (cons 'dress empty))
+
+;; ex 10.1.8
+
+;; Test set
+;; (how-many 0 2 1)  => -1
+;; (how-many 1 0 -1) => 2
+;; (how-many 2 4 2)  => 1
+;; (how-many 1 0 1)  => 0
+
+(define (how-many a b c)
+  (cond
+    [(= a 0) -1]
+    [(> (* b b) (* 4 a c)) 2]
+    [(= (* b b) (* 4 a c)) 1]
+    [(< (* b b) (* 4 a c)) 0]))
+
+;; quadratic-roots : number number number -> symbol or number of list-of-numbers
+(define (quadratic-roots a b c)
+  (cond
+    [(= (how-many a b c) -1) 'degenerate]
+    [(= (how-many a b c)  0) 'none]
+    [(= (how-many a b c)  1) (/ (- b) (* 2 a))]
+    [(= (how-many a b c)  2)
+     (cons
+      (/ (+ (- b) (sqrt (- (sqr b) (* 4 a c)))) (* 2 a))
+      (cons
+       (/ (- (- b) (sqrt (- (sqr b) (* 4 a c)))) (* 2 a))
+       empty))]))
+
+;; test
+;(quadratic-roots 0 2 1)  ;; 'degenerate
+;(quadratic-roots 1 0 -1) ;; (cons 1 (cons -1 empty))
+;(quadratic-roots 2 4 2)  ;; -1
+;(quadratic-roots 1 0 1)  ;; 'none
+
+;; ex 10.1.9
+
+;; examples:
+;; (controller 103)
+;; results:
+;; (cons 1 (cons 'dollar (cons 'and (cons 3 (cons 'cents empty)))))
+
+;; contoller: number -> list
+(define (controller money)
+  (cons (quotient money 100)
+        (cons (cond
+                [(= (quotient money 100) 1) 'dollar]
+                [else 'dollars])
+              (cons 'and
+                    (cons (remainder money 100)
+                          (cons (cond
+                                  [(= (remainder money 100) 1) 'cent]
+                                  [else 'cents])
+                                empty))))))
+
+;; 0 dollars?
+;; and 0 cents(or cent)?
+

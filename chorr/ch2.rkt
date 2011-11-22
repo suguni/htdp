@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname ch1) (read-case-sensitive #t) (teachpacks ((lib "convert.ss" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "convert.ss" "teachpack" "htdp")))))
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname ch2) (read-case-sensitive #t) (teachpacks ((lib "convert.ss" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "convert.ss" "teachpack" "htdp")))))
 ;; ex 2.1.1
 ; 제곱 연산
 (sqr 4)
@@ -59,11 +59,13 @@
 (f-3 9)
 
 ;; ex 2.3.1
+(define (wage h)
+  (* 12 h))
 (define (tax total-pay)
   (* total-pay 0.15))
 (define (netpay h)
-  (* 12 h))
-(tax (netpay 300)) ; 540
+  (- (wage h) (tax (wage h))))
+(tax (wage 300)) ; 540
 
 ;; ex 2.3.2
 (define (sum-coins penny nickel dime quarter)

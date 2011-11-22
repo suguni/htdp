@@ -35,12 +35,29 @@
 
 ;; ex 5.1.4
 ;; what-kind : number number number -> symbol
+;(define (what-kind a b c)
+;  (cond
+;    [(= a 0)               'degenerate]
+;    [(> (* b b) (* 4 a c)) 'two]
+;    [(= (* b b) (* 4 a c)) 'one]
+;    [(< (* b b) (* 4 a c)) 'none]))
+;; => [TODO] use 4.4.4 how-many!!!
+
+(define (how-many a b c)
+  (cond
+    [(= a 0) -1]
+    [(> (* b b) (* 4 a c)) 2]
+    [(= (* b b) (* 4 a c)) 1]
+    [(< (* b b) (* 4 a c)) 0]))
+
 (define (what-kind a b c)
   (cond
-    [(= a 0)               'degenerate]
-    [(> (* b b) (* 4 a c)) 'two]
-    [(= (* b b) (* 4 a c)) 'one]
-    [(< (* b b) (* 4 a c)) 'none]))
+    [(= (how-many a b c) -1) 'degenerate]
+    [(= (how-many a b c) 2)  'two]
+    [(= (how-many a b c) 1)  'one]
+    [(= (how-many a b c) 0)  'none]))
+
+
 'what-kind
 (symbol=? (what-kind 1 0 -1) 'two)
 (symbol=? (what-kind 2 4 2)  'one)
@@ -49,9 +66,9 @@
 
 ;; ex 5.1.5
 ;; check-color : symbol symbol symbol symbol -> symbol
-(define (check-color guess1 guess2 target1 target2)
+(define (check-color target1 target2 guess1 guess2)
   (cond
     [(and (symbol=? guess1 target1) (symbol=? guess2 target2)) 'Perfect]
-    [(or (symbol=? guess1 target1) (symbol=? guess2 target2))  'OneColorAtCorrentPosition]
+    [(or (symbol=? guess1 target1) (symbol=? guess2 target2))  'OneColorAtCorrectPosition]
     [(or (symbol=? guess1 target2) (symbol=? guess2 target1))  'OneColorOccurs]
     [else                                                      'NothingCorrect]))

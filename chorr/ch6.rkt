@@ -104,6 +104,8 @@
 (define-struct movie (title producer))
 (movie-title (make-movie 'ThePhantomMenace 'Lucas))
 (movie-producer (make-movie 'TheEmpireStrikesBack 'Lucas))
+;(movie-title (make-movie x y)) = x
+;(movie-producer (make-movie x y)) = y
 
 ;; ex 6.3.3
 (define-struct fighter (name accel max-speed range))

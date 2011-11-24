@@ -29,12 +29,10 @@
     [else 'TooSmall]))
 (define (reverse-num g1 g2 g3)
   (+ (* g3 100) (* g2 10) g1))
-;(check-guess3 1 2 3 321)
-;-> Perfect
-;(check-guess3 4 6 8 264)
-;-> TooLarge
-;(check-guess3 4 6 8 987)
-;-> TooSmall
+
+(symbol=? (check-guess3 1 2 3 321) 'Perfect)
+(symbol=? (check-guess3 4 6 8 264) 'TooLarge)
+(symbol=? (check-guess3 4 6 8 987) 'TooSmall)
 ;(guess-with-gui-3 check-guess3)
 
 ;; ex 5.1.4
@@ -44,18 +42,15 @@
     [(> (sqr b) (* 4 a c)) 'two]
     [(= (sqr b) (* 4 a c)) 'one]
     [else 'none]))
-;(what-kind 1 2 3)
-;-> none
-;(what-kind 1 2 1)
-;-> one
-;(what-kind 4 1 -8)
-;-> two
+(symbol=? (what-kind 1 2 3) 'none)
+(symbol=? (what-kind 1 2 1) 'one)
+(symbol=? (what-kind 4 1 -8) 'two)
 
 ;; ex 5.1.5
 (define (check-color g1 g2 t1 t2)
   (cond
     [(and (symbol=? g1 t1) (symbol=? g2 t2)) 'Perfect]
-    [(or (symbol=? g1 t1) (symbol=? g2 t2)) 'OneColorAtCorrentPosition]
+    [(or (symbol=? g1 t1) (symbol=? g2 t2)) 'OneColorAtCorrectPosition]
     [(or (symbol=? g1 t2) (symbol=? g2 t1)) 'OneColorOccurs]
     [else 'NothingCorrect]))
 ;(master check-color)

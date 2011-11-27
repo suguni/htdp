@@ -108,7 +108,7 @@
                 (circle-radius s)
                 (circle-color s)))
 
-;; draw-a-rectangle : rectangle -> true
+;; clear-a-rectangle : rectangle -> true
 (define (clear-a-rectangle s)
   (clear-solid-rect (rectangle-nw s)
                     (rectangle-width s)
@@ -133,55 +133,68 @@
 ;(clear-shape s)
 
 ;; ex 7.4.5
-(define (draw-and-clear-shape a-shape)
-  (cond
-    [(circle? a-shape) (draw-and-clear-circle a-shape)]
-    [(rectangle? a-shape) (draw-and-clear-rectangle a-shape)]
-    [(square? a-shape) (draw-and-clear-square a-shape)]))
-
-(define (draw-and-clear-circle s)
-  (and
-   (draw-a-circle s)
-   (sleep-for-a-while 0.01)
-   (clear-a-circle s)))
-
-(define (draw-and-clear-rectangle s)
-  (and
-   (draw-a-rectangle s)
-   (sleep-for-a-while 0.01)
-   (clear-a-rectangle s)))
-
-(define (draw-and-clear-square s)
-  (and
-   (draw-a-square s)
-   (sleep-for-a-while 0.01)
-   (clear-a-square s)))
+;(define (draw-and-clear-shape a-shape)
+;  (cond
+;    [(circle? a-shape) (draw-and-clear-circle a-shape)]
+;    [(rectangle? a-shape) (draw-and-clear-rectangle a-shape)]
+;    [(square? a-shape) (draw-and-clear-square a-shape)]))
+;
+;(define (draw-and-clear-circle s)
+;  (and
+;   (draw-a-circle s)
+;   (sleep-for-a-while 0.01)
+;   (clear-a-circle s)))
+;
+;(define (draw-and-clear-rectangle s)
+;  (and
+;   (draw-a-rectangle s)
+;   (sleep-for-a-while 0.01)
+;   (clear-a-rectangle s)))
+;
+;(define (draw-and-clear-square s)
+;  (and
+;   (draw-a-square s)
+;   (sleep-for-a-while 0.01)
+;   (clear-a-square s)))
 
 ;; ex 7.4.6
+;(define (move-shape delta a-shape)
+;  (cond
+;    [(circle? a-shape) (move-circle delta a-shape)]
+;    [(rectangle? a-shape) (move-rectangle delta a-shape)]
+;    [(square? a-shape) (move-square delta a-shape)]))
+;
+;(define (move-circle d s)
+;  (cond
+;    [(draw-and-clear-circle s) (translate-circle d s)]
+;    [else s]))
+;
+;(define (move-rectangle d s)
+;  (cond
+;    [(draw-and-clear-rectangle s) (translate-rectangle d s)]
+;    [else s]))
+;
+;(define (move-square d s)
+;  (cond
+;    [(draw-and-clear-square s) (translate-square d s)]
+;    [else s]))
+
+;; 이렇게 구현해도 된다. (2011.11.27)
+(define (draw-and-clear-shape a-shape)
+  (and
+   (draw-shape a-shape)
+   (sleep-for-a-while 0.01)
+   (clear-shape a-shape)))
+
 (define (move-shape delta a-shape)
   (cond
-    [(circle? a-shape) (move-circle delta a-shape)]
-    [(rectangle? a-shape) (move-rectangle delta a-shape)]
-    [(square? a-shape) (move-square delta a-shape)]))
+    [(draw-and-clear-shape a-shape) (translate-shape delta a-shape)]
+    [else a-shape]))
 
-(define (move-circle d s)
-  (cond
-    [(draw-and-clear-circle s) (translate-circle d s)]
-    [else s]))
-
-(define (move-rectangle d s)
-  (cond
-    [(draw-and-clear-rectangle s) (translate-rectangle d s)]
-    [else s]))
-
-(define (move-square d s)
-  (cond
-    [(draw-and-clear-square s) (translate-square d s)]
-    [else s]))
-
-;; (draw-shape 
-;;  (move-shape 10
-;;              (move-shape 10
-;;                          (move-shape 10
-;;                                      (move-shape 10 ci)))))
+(start 500 500)
+(draw-shape 
+ (move-shape 10
+             (move-shape 10
+                         (move-shape 10
+                                     (move-shape 10 ci)))))
 

@@ -94,3 +94,84 @@
 
 ;; ex 7.2.1
 ;; 데이터 정의:
+(define-struct spider (remain-legs need-space))
+(define-struct elephant (need-space))
+(define-struct monkey (intelligence need-space))
+;; 동물(animal)은 다음 세 구조체 중 하나다.
+;; 1. (make-spider l s)
+;;    l, s는 수다.
+;; 2. (make-elephant s)
+;;    s는 수다.
+;; 3. (make-monkey i s)
+;;    i, s는 수다.
+
+;; 템플릿:
+;; (define (f a-animal)
+;;   (cond
+;;     [(spider? a-animal)
+;;      ... (spider-remain-legs a-animal) ... (spider-need-space a-animal) ...]
+;;     [(elephant? a-animal)
+;;      ... (elephant-need-space a-animal) ...]
+;;     [(monkey? a-animal)
+;;      ... (monkey-intelligance a-animal) ... (monkey-need-space a-animal) ...]))
+
+;; ex 7.2.2
+;; 위 문제와 같은 형태
+
+
+
+;; -- ch 7.3
+#|
+;; 데이터 정의:
+(define-struct circle (center radius))
+;; 원(circle)은 구조체다.
+;; (make-circle p s)
+;; p는 posn이고 s는 수다.
+
+(define-struct square (nw length))
+;; 정사각형(square)은 구조체다.
+;; (make-square p s)
+;; p는 posn이고 s는 수다.
+
+;; 도형(shape)은 다음 두 구조체 중 하나다.
+;; 1. circle
+;; 2. square
+
+;; 최종 정의: 
+;; perimeter : shape -> number
+(define (perimeter a-shape)
+  (cond
+    [(circle? a-shape) (perimeter-circle a-shape)]
+    [(square? a-shape) (perimeter-square a-shape)]))
+
+;; perimeter-circle : circle -> number
+(define (perimeter-circle a-circle)
+  (* (* 2 (circle-radius a-circle)) pi))
+
+;; perimeter-square : square -> number
+(define (perimeter-square a-square)
+  (* (square-length a-square) 4))
+|#
+
+
+;; ex 7.3.1
+#|
+;; 데이터 정의: (추가)
+(define-struct rectangle (position width height))
+;; 직사각형(rectangle)은 구조체다.
+;; (make-rectangle p w h)
+;; p는 posn이고 w, h는 수다.
+
+;; 최종 정의: (수정)
+;; perimeter : shape -> number
+(define (perimeter a-shape)
+  (cond
+    [(circle? a-shape) (perimeter-circle a-shape)]
+    [(square? a-shape) (perimeter-square a-shape)]
+    [(rectangle? a-shape) (perimeter-rectangle a-shape)]))
+
+;; perimeter-rectangle : rectangle -> number
+(define (perimeter-rectangle a-rectangle)
+  (+ (* (rectangle-width a-rectangle) 2) 
+     (* (rectangle-height a-rectangle) 2)))
+|#

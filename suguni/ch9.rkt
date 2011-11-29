@@ -292,4 +292,25 @@ empty
 ;; (draw-circles (make-posn 150 150)
 ;;               (cons 10 (cons 20 (cons 30 (cons 40 (cons 50 (cons 60 empty)))))))
 
-     
+;; ex 11.3.2
+(define (random-n-m n m)
+  (+ (random (- m n)) n))
+(define (tie-dyed n)
+  (cond
+    [(zero? n) empty]
+    [else
+     (cons (random-n-m 20 120)
+           (tie-dyed (sub1 n)))]))
+;(start 300 300)
+;(draw-circles (make-posn 150 150)
+;              (tie-dyed 30))
+
+;; ex 11.3.3
+(define (create-temps n low high)
+  (cond
+    [(zero? n) empty]
+    [else
+     (cons (random-n-m low high)
+           (create-temps (sub1 n) low high))]))
+
+(check-range-2 (create-temps 20 0 100) 5 95)

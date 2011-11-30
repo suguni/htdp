@@ -97,6 +97,10 @@
    (reveal-one (word-second chosen) (word-second status) guess)
    (reveal-one (word-third chosen) (word-third status) guess)))
 
+; (reveal-one 'a '_ 'c) => '_
+; (reveal-one 'a '_ 'a) => 'a
+; (reveal-one 'a 'a 'x) => 'a
+
 ;; Tests:
 (reveal (make-word 't 'e 'a) (make-word '_ 'e '_) 'u)
 ;; expected value

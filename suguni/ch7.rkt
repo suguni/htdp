@@ -7,7 +7,7 @@
 
 ;; ex 7.1.1
 (define-struct star (last first dob ssn))
-(number? (make-posn 2 3)) ;; false
+(check-expect (number? (make-posn 2 3)) false) ;; false
 (number? (+ 12 100)) ;; true
 (posn? 23) ;; false
 (posn? (make-posn 23 3)) ;; true
@@ -71,6 +71,7 @@
 (area (make-circle (make-posn 10 99) 1)) ;; = 3.14
 
 ;; template이 정확히 뭐야?
+;; => 사용가능하다.
 
 ;; ch 7.2
 
@@ -109,19 +110,28 @@
   (* n n n))
 
 ;; Definition:
+;(define (fits? a-animal cage)
+;  (cond
+;    [(spider? a-animal)
+;     (> cage (cube (spider-space a-animal)))]
+;    [(elephant? a-animal)
+;     (> cage (cube (elephant-space a-animal)))]
+;    [(monkey? a-animal)
+;     (> cage (cube (monkey-space a-animal)))]))
+;; space를 너무 복잡하게 생각한듯.
 (define (fits? a-animal cage)
   (cond
     [(spider? a-animal)
-     (> cage (cube (spider-space a-animal)))]
+     (> cage (spider-space a-animal))]
     [(elephant? a-animal)
-     (> cage (cube (elephant-space a-animal)))]
+     (> cage (elephant-space a-animal))]
     [(monkey? a-animal)
-     (> cage (cube (monkey-space a-animal)))]))
+     (> cage (monkey-space a-animal))]))
 
 ;; Tests:
-;; (= (fits? (make-spider ... 3) 50) true)
-;; (= (fits? (make-elephant ... 5) 200) true)
-;; (= (fits? (make-monkey ... 4) 100) true)
+(check-expect (fits? (make-spider ... 3) 50) true)
+(check-expect (fits? (make-elephant 5) 200) true)
+(check-expect (fits? (make-monkey ... 4) 100) true)
 
 ;; ex 7.2.2
 
@@ -215,14 +225,14 @@
     [else (error 'checked-area-of-disk "positive number expected")]))
 
 ;; ex 7.5.2
-
+#|
 (define (profit ticket-price)
   (cond
     [(and (number? ticket-price) (> ticket-price ))
      (- (revenue ticket-price)
         (cost ticket-price))]
     [else (error 'profit "positive number expected")]))
-
+|#
 
 ;; is-between-5-6? : number  ->  boolean
 ;; to determine whether n is between 5 and 6 (exclusive)
@@ -251,7 +261,7 @@
 ;; Final Definitions: 
 ;; perimeter : shape  ->  number
 ;; to compute the perimeter of a-shape
-(define (perimeter a-shape)
+(define (perimeter-3 a-shape)
   (cond
     [(circle? a-shape)
      (perimeter-circle a-shape)]

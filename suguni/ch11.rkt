@@ -284,3 +284,153 @@ empty
   (/ (! m) (! n)))
 
 (product 3 5) ;; => (/ (* 1 2 3 4 5) (* 1 2 3)) = (* 4 5) = 20
+
+;; ex 11.4.3
+;; product-from-minus-11 : number[>= -11] -> number
+(define (product-from-minus-11 n)
+  (cond
+    [(= n -11) 1]
+    [else
+     (* n (product-from-minus-11 (sub1 n)))]))
+;; test
+(product-from-minus-11 -11) ;; 1
+(product-from-minus-11 -10) ;; -10
+(product-from-minus-11 -1)  ;; -1 * -2 * -3 * ... * -10 = 3628800
+(product-from-minus-11 100) ;; 0, 0이상이면 무조건 0이다.
+
+;; ex 11.4.4
+;; tabulate-f20 : n -> list-of-posn
+(define (tabulate-f20 n)
+  (cond
+    [(<= n 20) empty]
+    [else
+     (cons (make-posn n (f n))
+           (tabulate-f20 (sub1 n)))]))
+
+;; tests
+(tabulate-f20 20) ;; empty
+(tabulate-f20 22) ;; =>
+(cons (make-posn 22 (f 22))
+      (cons (make-posn 21 (f 21)) empty))
+
+;; ex 11.4.5
+;; tabulate-f-lim number[limit] number[>=limit] => list-of-posn
+(define (tabulate-f-lim n limit)
+  (cond
+    [(<= limit n) empty]
+    [else
+     (cons (make-posn limit (f limit))
+           (tabulate-f-lim n (sub1 limit)))]))
+
+;; tests
+(tabulate-f-lim 20 20) ;; empty
+(tabulate-f-lim 20 22) ;; =>
+(cons (make-posn 22 (f 22))
+      (cons (make-posn 21 (f 21)) empty))
+(tabulate-f-lim 0 3)
+
+;; ex 11.4.6
+;; tabulate-f-up-to-20 : Number[<= 20] => number
+(define (tabulate-f-up-to-20 n)
+  (cond
+    [(= n 20) empty]
+    [else
+     (cons (make-posn n (f n))
+           (tabulate-f-up-to-20 (add1 n)))]))
+;; tests
+(tabulate-f-up-to-20 18)
+(cons (make-posn 18 (f 18))
+      (cons (make-posn 19 (f 19)) empty))
+
+;; ex 11.4.7
+;; is-not-divisible-by<=i : i[i >= 1] m[i < m] => boolean
+(define (is-not-divisible-by<=i i m)
+  (cond
+   [(= i 1) true]
+   [else
+    (cond
+      [(= (remainder m i) 0) false]
+      [else (is-not-divisible-by<=i (sub1 i) m)])]))
+
+(is-not-divisible-by<=i 2 3)  ;; true
+(is-not-divisible-by<=i 7 8)  ;; false
+(is-not-divisible-by<=i 9 11) ;; true
+;; true 이면 prime number 이다.
+
+;; prime? : number -> boolean
+(define (prime? n)
+  (is-not-divisible-by<=i (ceiling (/ n 2)) n))
+;; test
+(prime? 11) ;; true
+(prime? 28) ;; false
+
+;; ex 11.5.1
+;; add : Number Number -> Number
+;; x에 add1을 n번 수행한다. !!!
+(define (add n x)
+  (cond
+    [(zero? n) x]
+    [else
+     (add1 (add (sub1 n) x))]))
+
+;; test
+(add 10 2) ;; 12
+
+;; ex 11.5.2
+;; multiply-by-pi : Number -> Number
+(define (multiply-by-pi n)
+  (cond
+    [(zero? n) 0]
+    [else
+     (+ 3.14 (multiply-by-pi (sub1 n)))]))
+
+;; tests
+(= (multiply-by-pi 0) 0)
+(= (multiply-by-pi 2) 6.28)
+(= (multiply-by-pi 3) 9.42)
+(= (multiply-by-pi 10) 31.4)
+
+;; multiply : Number Number -> Number
+(define (multiply n x)
+  (cond
+    [(= n 1) x]
+    [else
+     (add x (multiply (sub1 n) x))]))
+
+(= (multiply 2 3) 6)
+(= (multiply 5 7) 35)
+
+;; ex 11.5.3
+;; exponent : Number Number -> Number
+(define (exponent n x)
+  (cond
+    [(= n 1) x]
+    [else
+     (multiply x (exponent (sub1 n) x))]))
+(= (exponent 2 3) 9)   ;; => 3^2
+(= (exponent 5 3) 243) ;; => 3^5
+
+;; ex 11.5.4
+;; 이거 맞는거야???
+;; 0 => empty
+;; 3 => (cons (cons (cons 1 empty) empty) empty)
+;; 8 => (cons (cons (cons (cons (cons (cons (cons (cons 1 empty) empty) empty)
+;;                               empty) empty) empty) empty) empty)
+;; addDL : Number Number => Deep-List
+;(define (addDL n m)
+;  (cond
+;    [(zero? n) 1]
+;    [else
+;     (cons (addDL (sub1 n) m) empty)]))
+
+(define (addDL n m)
+  (cond
+    [(and (zero? n) (zero? m)) 1]
+    [(zero? n) (cons (addDL n (sub1 m)) empty)]
+    [(zero? m) (cons (addDL (sub1 n) m) empty)]
+    [else (cons (cons (addDL (sub1 n) (sub1 m)) empty) empty)]))
+
+(addDL 1 1) ;; (cons 1 empty) + (cons 1 empty) => (cons (cons 1 empty) empty)
+(addDL 2 3) ;; (cons (cons 1 empty) empty) + (cons (cons (cons 1 empty) empty) empty)
+            ;; (cons (cons (cons (cons (cons 1 empty) empty) empty) empty) empty)
+;; 뭔가 이상하다!!!

@@ -175,3 +175,59 @@
   (+ (* (rectangle-width a-rectangle) 2) 
      (* (rectangle-height a-rectangle) 2)))
 |#
+
+;; -- ch 7.5
+;; 별도 풀이
+
+
+;; -- ch 7.5
+
+;; ex 7.5.1
+(define (area-of-disk r)
+  (* pi (* r r)))
+
+(define (checked-area-of-disk v)
+  (cond
+    [(and (number? v) (> v 0)) (area-of-disk v)]
+    [else (error 'checked-area-of-disk "number expected")]))
+
+(check-within (checked-area-of-disk 2) 12.56 0.01)
+(check-error (checked-area-of-disk 'a))
+
+;; ex 7.5.2
+(define (profit ticket-price)
+  (- (revenue ticket-price)
+     (cost ticket-price)))
+(define (revenue ticket-price)
+  (* (attendees ticket-price) ticket-price))
+(define (cost ticket-price)
+  (+ 180 
+     (* .04 (attendees ticket-price))))
+(define (attendees ticket-price)
+  (+ 120 (* (/ 15 .10) (- 5.00 ticket-price))))
+
+(define (checked-profit v)
+  (cond
+    [(number? v) (profit v)]
+    [else (error 'checked-profit "number expected")]))
+  
+(check-expect (checked-profit 3.0) 1063.2)
+(check-error (checked-profit false))
+
+;; ex 7.5.3
+;; 데이터 정의:
+(define-struct vec (x y))
+;; A speed-vector (vec) is a structure: 
+;;  (make-vec x y)  
+;; where both x and y are positive numbers.
+
+(define (checked-make-vec x y)
+  (cond
+    [(and (number? x) (number? y) (> x 0) (> y 0)) (make-vec x y)]
+    [(or (and (number? x) (<= x 0)) (and (number? y) (<= y 0)))
+         (error 'checked-make-vec "only positive number")]
+    [else (error 'checked-make-vec "number expected")]))
+
+(check-expect (checked-make-vec 4 6) (make-vec 4 6))
+(check-error (checked-make-vec 4 -2))
+(check-error (checked-make-vec 'z 2))

@@ -224,6 +224,10 @@
     [(and (number? v) (> v 0)) (area-of-disk v)]
     [else (error 'checked-area-of-disk "positive number expected")]))
 
+;; 2011/12/6, error test
+(check-error (checked-area-of-disk "number"))
+
+
 ;; ex 7.5.2
 #|
 (define (profit ticket-price)

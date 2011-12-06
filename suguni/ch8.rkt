@@ -39,7 +39,7 @@
 ;; 1. (x)
 ;; 올바르지 않은 문장. ex 8.2.1 참조
 ;; 2. (+ 1 (not x))
-;; (<prn> <con> (<prn> <var>)) 형태로 올바르다.
+;; (<prn> <con> (<prn> <var>)) 형태로 올바르다. not symantic
 ;; 3. (+ 1 2 3)
 ;; (<prn> <con> <con> <con>) 형태로 올바른 문장이다.
 
@@ -142,7 +142,7 @@ true
 
 ;; (define-struct oops ())
 ;; 올바르지 않음. 괄호로 묶임 이름 영역에 var들이 없음. X!!!
-;; REPL에 돌려보면 올바른 표현임.
+;; REPL에 돌려보면 올바른 표현임.???????
 
 ;; (define-struct child (dob date (- date dob)))
 ;; (- date dob)은 var가 아님.

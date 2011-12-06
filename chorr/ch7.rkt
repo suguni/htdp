@@ -115,6 +115,21 @@
 ;;     [(monkey? a-animal)
 ;;      ... (monkey-intelligance a-animal) ... (monkey-need-space a-animal) ...]))
 
+;; 구현:
+(define (fits? a-animal cage-space)
+  (cond
+    [(spider? a-animal)
+     (> cage-space (spider-need-space a-animal))]
+    [(elephant? a-animal)
+     (> cage-space (elephant-need-space a-animal))]
+    [(monkey? a-animal)
+     (> cage-space (monkey-need-space a-animal))]))
+
+;; 테스트:
+(check-expect (fits? (make-spider 8 5) 10) true)
+(check-expect (fits? (make-spider 8 5) 2) false)
+
+
 ;; ex 7.2.2
 ;; 위 문제와 같은 형태
 

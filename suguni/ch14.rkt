@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname ch14) (read-case-sensitive #t) (teachpacks ((lib "guess.ss" "teachpack" "htdp") (lib "draw.ss" "teachpack" "htdp") (lib "arrow.ss" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "guess.ss" "teachpack" "htdp") (lib "draw.ss" "teachpack" "htdp") (lib "arrow.ss" "teachpack" "htdp")))))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname ch14) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
 ;; ch 14
 
 (define-struct child (father mother name date eyes))
@@ -259,3 +259,49 @@
 (check-expect (sum-age Gustav 2011) (+ 23 46 45 85 85))
 
 ;; ex 14.1.5
+;; eye-colors : ftn -> list-of-symbols
+(define (eye-colors a-ftree)
+  (cond
+    [(empty? a-ftree) empty]
+    [else
+     (cons (child-eyes a-ftree)
+           (append (eye-colors (child-father a-ftree))
+                   (eye-colors (child-mother a-ftree))))]))
+
+;; test
+(check-expect (eye-colors Carl)
+              (list 'green))
+(check-expect (eye-colors Adam)
+              (list 'yellow 'green 'green))
+(check-expect (eye-colors Gustav)
+              (list 'brown 'pink 'blue 'green 'green)) ;; order check
+
+;; ex 14.1.6
+;; proper-blue-eyed-ancestor? ftn -> boolean
+;; to determine whether a-ftree has a blue-eyed ancestor
+;(define (proper-blue-eyed-ancestor? a-ftree)
+;  (cond
+;    [(empty? a-ftree) false]
+;    [else
+;     (or
+;      (proper-blue-eyed-ancestor? (child-father a-ftree))
+;      (proper-blue-eyed-ancestor? (child-mother a-ftree)))]))
+;; (proper-blue-eyed-ancestor? A)
+;; 어떤 a-ftree가 인자로 넘어가든 false가 된다.
+;; 자신이 아닌 부모만을 검사하도록 코드가 짜여져있고,
+;; 결국에는 모든 경우 empty가 되므로 false가 된다.
+
+;; revised proper-blue-eyed-ancestor?
+(define (proper-blue-eyed-ancestor? a-ftree)
+  (cond
+    [(empty? a-ftree) false]
+    [else (or
+           (blue-eyed-ancestor? (child-father a-ftree))
+           (blue-eyed-ancestor? (child-mother a-ftree)))]))
+
+;; tests
+(check-expect (proper-blue-eyed-ancestor? empty) false)
+(check-expect (proper-blue-eyed-ancestor? Carl) false)
+(check-expect (proper-blue-eyed-ancestor? Eva) false)
+(check-expect (proper-blue-eyed-ancestor? Gustav) true)
+

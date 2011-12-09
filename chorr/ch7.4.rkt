@@ -96,40 +96,17 @@
 ;; ex 7.4.5
 ;; draw-and-clear-shape : shape -> boolean
 (define (draw-and-clear-shape a-shape)
-  (cond
-    [(circle? a-shape) (draw-and-clear-circle a-shape)]
-    [(rectangle? a-shape) (draw-and-clear-rectangle a-shape)]))
-
-;; draw-and-clear-circle : circle -> boolean
-(define (draw-and-clear-circle c)
-  (and (draw-a-circle c)
+  (and (draw-shape a-shape)
        (sleep-for-a-while 0.5)
-       (clear-a-circle c)))
-
-;; draw-and-clear-rectangle : rectangle -> boolean
-(define (draw-and-clear-rectangle r)
-  (and (draw-a-rectangle r)
-       (sleep-for-a-while 0.5)
-       (clear-a-rectangle r)))
+       (clear-shape a-shape)))
 
 ;; ex 7.4.6
 ;; move-shape : number shape -> shape
 (define (move-shape delta a-shape)
   (cond
-    [(circle? a-shape) (move-circle delta a-shape)]
-    [(rectangle? a-shape) (move-rectangle delta a-shape)]))
+    [(draw-and-clear-shape a-shape) (translate-shape a-shape delta)]
+    [else a-shape]))
 
-;; move-circle : number circle -> circle
-(define (move-circle delta c)
-  (cond
-    [(draw-and-clear-circle c) (translate-circle c delta)]
-    [else c]))
-
-;; move-rectangle : number rectangle -> rectangle
-(define (move-rectangle delta r)
-  (cond
-    [(draw-and-clear-rectangle r) (translate-rectangle r delta)]
-    [else r]))
 
 #| 실행
 (start 200 200)

@@ -305,3 +305,180 @@
 (check-expect (proper-blue-eyed-ancestor? Eva) false)
 (check-expect (proper-blue-eyed-ancestor? Gustav) true)
 
+;; 14.2
+(define-struct node (ssn name left right))
+
+;; Binray Tree is
+;;  false or
+;;  (make-node soc pn lft rgt)
+;;   where soc - number, pn - symbol, lft and rgt - Binray Tree
+
+;; ex 14.2.1
+;; tree image : ch14-ex14.2.1.png
+;; contains-bt : number binary-tree -> boolean
+(define (contains-bt n b-t)
+  (cond
+    [(false? b-t) false]
+    [else
+     (or
+       (= n (node-ssn b-t))
+       (contains-bt n (node-left b-t))
+       (contains-bt n (node-right b-t)))]))
+
+;; test
+(define t1 (make-node 15 'd false (make-node 24 'i false false)))
+(define t2 (make-node 15 'd (make-node 87 'h false false) false))
+(define t3 false)
+
+(check-expect (contains-bt 15 t1) true)
+(check-expect (contains-bt 10 t1) false)
+(check-expect (contains-bt 87 t2) true)
+(check-expect (contains-bt 76 t2) false)
+(check-expect (contains-bt 15 t3) false)
+
+;; ex 14.2.2
+;; search-bt : soc binary-tree -> pn
+(define (search-bt n bt)
+  (cond
+    [(false? bt) false]
+    [(= n (node-ssn bt)) (node-name bt)]
+    [(contains-bt n (node-left bt)) (search-bt n (node-left bt))]
+    [(contains-bt n (node-right bt)) (search-bt n (node-right bt))]
+    [else false]))
+;; left, right에서 찾을때는 비효율적.
+;; left, right를 대상으로 search-bt 한 후 결과에 따라(false or node)
+;; 반환하도록 하면 검색양이 줄어들 텐데, 아직 let이 없어서...
+
+;; test
+(check-expect (search-bt 15 t1) 'd)
+(check-expect (search-bt 10 t1) false)
+(check-expect (search-bt 87 t2) 'h)
+(check-expect (search-bt 76 t2) false)
+(check-expect (search-bt 15 t3) false)
+
+;; ex 14.2.3
+;; inorder : binary-search-tree -> list-of-ssn
+(define (inorder bst)
+  (cond
+    [(false? bst) empty]
+    [else
+     (append
+      (inorder (node-left bst))
+      (list (node-ssn bst))
+      (inorder (node-right bst)))]))
+
+;; test
+(define tree-A (make-node 63 'a
+                          (make-node 29 'b
+                                     (make-node 15 'c
+                                                (make-node 10 'd false false)
+                                                (make-node 24 'e false false))
+                                     false)
+                          (make-node 89 'f
+                                     (make-node 77 'g false false)
+                                     (make-node 95 'h
+                                                false
+                                                (make-node 99 'i false false)))))
+(check-expect (inorder tree-A) (list 10 15 24 29 63 77 89 95 99))
+
+;; ex 14.2.4
+;; search-bst : number(ssn) binary-search-tree -> symbol(name) or false
+(define (search-bst n bst)
+  (cond
+    [(false? bst) false]
+    [(= n (node-ssn bst)) (node-name bst)]
+    [(> n (node-ssn bst)) (search-bst n (node-right bst))]
+    [else (search-bst n (node-left bst))])) ;; (< n (node-ssn bst))
+
+;; tests
+(check-expect (search-bst 77 tree-A) 'g)
+(check-expect (search-bst 40 tree-A) false)
+
+;; ex 14.2.5
+;; create-bst : binary-search-tree number(ssn) symbol(name) -> binary-search-tree
+(define (create-bst bst soc pn)
+  (cond
+    [(false? bst) (make-node soc pn false false)]
+    [(> soc (node-ssn bst)) (make-node (node-ssn bst) 
+                                       (node-name bst) 
+                                       (node-left bst)
+                                       (create-bst (node-right bst) soc pn))]
+    [(< soc (node-ssn bst)) (make-node (node-ssn bst) 
+                                       (node-name bst) 
+                                       (create-bst (node-left bst) soc pn)
+                                       (node-right bst))]
+    [else (error "Invalid SSN Number")]))
+
+;; tests
+(check-expect (create-bst false 66 'a) (make-node 66 'a false false))
+(check-expect (create-bst (create-bst false 66 'a) 53 'b)
+              (make-node 66 'a
+                         (make-node 53 'b false false)
+                         false))
+(check-expect (create-bst
+               (create-bst
+                (create-bst
+                 (create-bst
+                  (create-bst
+                   (create-bst 
+                    (create-bst 
+                     (create-bst
+                      (create-bst false 63 'a)
+                      29 'b)
+                     15 'c) 
+                    10 'd) 
+                   24 'e)
+                  89 'f)
+                 77 'g)
+                95 'h)
+               99 'i) tree-A)
+
+;; ex 14.2.6
+;; create-bst-from-list : list-of-number/name -> binary-search-tree
+(define (create-bst-from-list lonns)
+  (cond
+    [(empty? lonns) false]
+    [else
+     (create-bst (create-bst-from-list (rest lonns))
+                 (first (first lonns))
+                 (second (first lonns)))]))
+
+;; tests
+(define sample ;; 위에서 정의한 tree-A에 맞게 name을 변경했다. 순서는 동일.
+  '((99 i)
+    (77 g)
+    (24 e)
+    (10 d)
+    (95 h)
+    (15 c)
+    (89 f)
+    (29 b)
+    (63 a)))
+(check-expect (create-bst-from-list sample) tree-A)
+
+;; size : WP -> number
+(define (size a-wp)
+  (cond
+    [(empty? a-wp) 0]
+    [(symbol? (first a-wp)) (+ 1 (size (rest a-wp)))]
+    [else (+ (size (first a-wp)) (size (rest a-wp)))]))
+    
+;; ex 14.3.1
+;; - a-wp가 empty면 0
+;; - a-wp의 first가 symbol이면 a-wp의 rest로 size 계산한 결과에 +1
+;; - a-wp의 first가 symbol이 아니면(list)이면,
+;;   a-wp의 first에 대한 size와 rest에 size의 합
+
+;; tests
+(check-expect (size empty) 0)
+(check-expect (size (cons 'One empty)) 1)
+(check-expect (size (cons (cons 'One empty) empty)) 1)
+
+;; ex 14.3.2
+;; occurs1 : wp symbol -> number
+(define (occurs1 a-wp s)
+  ...)
+
+;; occurs2 : wp symbol -> number
+(define (occurs2 a-wp s)
+  ...)

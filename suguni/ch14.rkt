@@ -514,3 +514,160 @@
 (check-expect (occurs2 (cons (cons 'One empty) empty)  'One) 1)
 (check-expect (occurs2 '(One Two) 'One) 1)
 (check-expect (occurs2 '(One (Two One) (Two Three (Four One) Five)) 'One) 3)
+
+
+;; ex 14.3.3
+;; replace : symbol(new) symbol(old) wp -> wp
+(define (replace new old a-wp)
+  (cond
+    [(empty? a-wp) empty]
+    [(symbol? (first a-wp))
+     (cond
+       [(symbol=? (first a-wp) old)
+        (cons new (replace new old (rest a-wp)))]
+       [else
+        (cons (first a-wp) (replace new old (rest a-wp)))])]
+    [else
+     (cons (replace new old (first a-wp))
+           (replace new old (rest a-wp)))]))
+
+;; tests
+(check-expect (replace 'MyOne 'One empty)
+              empty)
+(check-expect (replace 'MyOne 'One '(One))
+              '(MyOne))
+(check-expect (replace 'MyOne 'One '((One)))
+              '((MyOne)))
+(check-expect (replace 'MyOne 'One '(One Two))
+              '(MyOne Two))
+(check-expect (replace 'MyOne 'One '(One (Two One) (Two Three (Four One) Five)))
+              '(MyOne (Two MyOne) (Two Three (Four MyOne) Five)))
+
+;; ex 14.3.4
+;; depth : a-wp -> number
+(define (depth a-wp)
+  (cond
+    [(empty? a-wp) 0]
+    [(symbol? (first a-wp)) (depth (rest a-wp))]
+    [else
+     (max (+ 1 (depth (first a-wp)))
+          (depth (rest a-wp)))]))
+
+;; why????
+
+;; tests
+(check-expect (depth empty) 0)
+(check-expect (depth '(One)) 0)
+(check-expect (depth '((One))) 1)
+(check-expect (depth '(One Two)) 0)
+(check-expect (depth '(One (Two Two) (Two Two (Three Three) Two))) 2)
+(check-expect (depth '(One (Two Two) (Two Two (Three (Four Four) (Four) Three) Two))) 3)
+
+;; ex 14.4.1
+(define-struct add (left right))
+(define-struct mul (left right))
+
+; scheme-exp은 다음 중 한 가지 이다.
+; 1. Number
+; 2. Symbol
+; 3. (make-add l r)
+; 4. (make-mul l r)
+;    3, 4에서 l과 r은 Scheme 표현이다.
+
+;(+ 10 -10)
+;(make-add 10 -10)
+;
+;(+ (* 20 3) 33)
+;(make-add (make-mul 20 3) 33)
+;
+;(* 3.14 (* r r))
+;(make-mul 3.14 (make-mul 'r 'r))
+;
+;(+ (* 9/5 c) 32)
+;(make-add (make-mul 9/5 'c) 32)
+;
+;(+ (* 3.14 (* o o)) (* 3.14 (* i i)))
+;(make-add (make-mul 3.14 (make-mul 'o 'o)) (make-mul 3.14 (make-mul 'i 'i)))
+
+;; ex 14.4.2
+;; numeric? : scheme-exp -> boolean
+(define (numeric? s-exp)
+  (cond
+    [(number? s-exp) true]
+    [(symbol? s-exp) false]
+    [(add? s-exp) (and (numeric? (add-left s-exp))
+                       (numeric? (add-right s-exp)))]
+    [(mul? s-exp) (and (numeric? (mul-left s-exp))
+                       (numeric? (mul-right s-exp)))]
+    [else (error "Invalid scheme expression")]))
+
+;; tests
+(check-expect (numeric? 1) true)
+(check-expect (numeric? 'x) false)
+(check-expect (numeric? (make-add 10 -10)) true)
+(check-expect (numeric? (make-add (make-mul 20 3) 33)) true)
+(check-expect (numeric? (make-mul 3.14 (make-mul 'r 'r))) false)
+(check-expect (numeric? (make-add (make-mul 9/5 'c) 32)) false)
+(check-expect (numeric? (make-add (make-mul 3.14 (make-mul 'o 'o))
+                                  (make-mul 3.14 (make-mul 'i 'i)))) false)
+(check-expect (numeric? (make-add (make-mul 3.14 (make-mul 10 10)) 
+                                  (make-mul 3.14 (make-mul 5 5)))) true)
+
+;; ex 14.4.3
+; numeric-scheme-exp은 다음 중 한 가지 이다.
+; 1. Number
+; 2. (make-add l r)
+; 3. (make-mul l r)
+;    2, 3에서 l과 r은 numeric-scheme-exp 표현이다.
+
+;; evaluate-expression : numeric-scheme-expression -> number
+(define (evaluate-expression ns-exp)
+  (cond
+    [(number? ns-exp) ns-exp]
+    [(add? ns-exp) (+ (evaluate-expression (add-left ns-exp))
+                      (evaluate-expression (add-right ns-exp)))]
+    [(mul? ns-exp) (* (evaluate-expression (mul-left ns-exp))
+                      (evaluate-expression (mul-right ns-exp)))]
+    [else
+     (error "Invalid numeric-scheme-expression" ns-exp)]))
+
+;; tests
+(check-expect (evaluate-expression 1) 1)
+(check-expect (evaluate-expression (make-add 10 -10)) 0)
+(check-expect (evaluate-expression (make-add (make-mul 20 3) 33)) 93)
+(check-expect (evaluate-expression (make-add (make-mul 3.14 (make-mul 10 10))
+                                             (make-mul 3.14 (make-mul 5 5)))) 392.5)
+(check-error (evaluate-expression 'x))
+(check-error (evaluate-expression (make-mul 3.14 (make-mul 'r 'r))))
+(check-error (evaluate-expression (make-add (make-mul 9/5 'c) 32)))
+(check-error (evaluate-expression (make-add (make-mul 3.14 (make-mul 'o 'o))
+                                            (make-mul 3.14 (make-mul 'i 'i)))))
+
+;; ex 14.4.4
+;; subst : symbol number scheme-expression -> numeric-scheme-expression
+(define (subst v n s-exp)
+  (cond
+    [(number? s-exp) s-exp]
+    [(symbol? s-exp)
+     (cond
+       [(symbol=? s-exp v) n]
+       [else s-exp])]
+    [(add? s-exp)
+     (make-add (subst v n (add-left s-exp))
+               (subst v n (add-right s-exp)))]
+    [(mul? s-exp)
+     (make-mul (subst v n (mul-left s-exp))
+               (subst v n (mul-right s-exp)))]
+    [else
+     (error "Invalid scheme-expression" s-exp)]))
+
+;; tests     
+(check-expect (subst 'x 10 'x) 10)
+(check-expect (subst 'r 3 (make-mul 3.14 (make-mul 'r 'r)))
+              (make-mul 3.14 (make-mul 3 3)))
+(check-expect (subst 'c 10 (make-add (make-mul 9/5 'c) 32))
+              (make-add (make-mul 9/5 10) 32))
+(check-expect (subst 'o 5 (make-add (make-mul 3.14 (make-mul 'o 'o))
+                                    (make-mul 3.14 (make-mul 'i 'i))))
+              (make-add (make-mul 3.14 (make-mul 5 5))
+                        (make-mul 3.14 (make-mul 'i 'i))))

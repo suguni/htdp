@@ -477,8 +477,40 @@
 ;; ex 14.3.2
 ;; occurs1 : wp symbol -> number
 (define (occurs1 a-wp s)
-  ...)
+  (cond
+    [(empty? a-wp) 0]
+    [(symbol? (first a-wp))
+     (cond
+       [(symbol=? (first a-wp) s)
+        (+ 1 (occurs1 (rest a-wp) s))]
+       [else
+        (occurs1 (rest a-wp) s)])]
+    [else (occurs1 (rest a-wp) s)]))
+
+;; tests
+(check-expect (occurs1 empty 'One) 0)
+(check-expect (occurs1 (cons 'One empty) 'One) 1)
+(check-expect (occurs1 (cons (cons 'One empty) empty)  'One) 0)
+(check-expect (occurs1 '(One Two) 'One) 1)
+(check-expect (occurs1 '(One (Two One) (Two Three (Four One) Five)) 'One) 1)
 
 ;; occurs2 : wp symbol -> number
 (define (occurs2 a-wp s)
-  ...)
+  (cond
+    [(empty? a-wp) 0]
+    [(symbol? (first a-wp))
+     (cond
+       [(symbol=? (first a-wp) s)
+        (+ 1 (occurs2 (rest a-wp) s))]
+       [else
+        (occurs2 (rest a-wp) s)])]
+    [else
+     (+ (occurs2 (first a-wp) s)
+        (occurs2 (rest a-wp) s))]))
+
+;; tests
+(check-expect (occurs2 empty 'One) 0)
+(check-expect (occurs2 (cons 'One empty) 'One) 1)
+(check-expect (occurs2 (cons (cons 'One empty) empty)  'One) 1)
+(check-expect (occurs2 '(One Two) 'One) 1)
+(check-expect (occurs2 '(One (Two One) (Two Three (Four One) Five)) 'One) 3)

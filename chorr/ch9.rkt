@@ -2,6 +2,67 @@
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-beginner-reader.ss" "lang")((modname ch9) (read-case-sensitive #t) (teachpacks ((lib "guess.ss" "teachpack" "htdp") (lib "draw.ss" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "guess.ss" "teachpack" "htdp") (lib "draw.ss" "teachpack" "htdp")))))
 
+;; ex 9.1.1
+;; 1)
+(cons 'Mercury 
+      (cons 'Venus 
+            (cons 'Earth 
+                  (cons 'Mars 
+                        (cons 'Jupiter 
+                              (cons 'Saturn 
+                                    (cons 'Uranus 
+                                          (cons 'Neptune empty))))))))
+
+;; ex 9.1.2
+(define l (cons 10 (cons 20 (cons 5 empty))))
+
+(check-expect (rest l) 
+              (cons 20 (cons 5 empty)))
+(check-expect (first (rest l)) 
+              20)
+(check-expect (rest (rest l)) 
+              (cons 5 empty))
+(check-expect (first (rest (rest l)))
+              5)
+(check-expect (rest (rest (rest l)))
+              empty)
+
+;; ex 9.1.3
+;; add-up-3 : list-of-3-numbers  ->  number
+;; a-list-of-3-numbers 내의 세 수의 합을 계산한다.
+
+;; Examples: 
+;;   (= (add-up-3 (cons 2 (cons 1 (cons 3 empty)))) 6)
+;;   (= (add-up-3 (cons 0 (cons 1 (cons 0 empty)))) 1)
+
+;; Template:
+;; (define (add-up-3 a-list-of-3-numbers) 
+;;   ... (first a-list-of-3-numbers) ... 
+;;   ... (first (rest a-list-of-3-numbers)) ...
+;;   ... (first (rest (rest a-list-of-3-numbers))) ... )
+
+;; Definition:
+(define (add-up-3 a-list-of-3-numbers)
+  (+ (first a-list-of-3-numbers)
+     (first (rest a-list-of-3-numbers))
+     (first (rest (rest a-list-of-3-numbers)))))
+
+;; Tests:
+(check-expect (add-up-3 (cons 2 (cons 1 (cons 3 empty)))) 6)
+(check-expect (add-up-3 (cons 0 (cons 1 (cons 0 empty)))) 1)
+
+;; distance-to-0-for-3 : list-of-3-numbers -> number
+;; 원점에서 3차원상의 점까지 거리를 계산한다.
+(define (distance-to-0-for-3 a-list-of-3-numbers)
+  (sqrt (+ (sqr (first a-list-of-3-numbers))
+           (sqr (first (rest a-list-of-3-numbers)))
+           (sqr (first (rest (rest a-list-of-3-numbers)))))))
+
+;; Tests:
+(check-within (distance-to-0-for-3 (cons 2 (cons 1 (cons 3 empty)))) 3.7416 0.001)
+(check-expect (distance-to-0-for-3 (cons 0 (cons 1 (cons 0 empty)))) 1)
+
+
 ;; ex 9.1.4
 #| 정의:
 list-of-2-symbol은 다음과 같다.

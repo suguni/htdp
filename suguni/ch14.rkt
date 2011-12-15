@@ -305,3 +305,369 @@
 (check-expect (proper-blue-eyed-ancestor? Eva) false)
 (check-expect (proper-blue-eyed-ancestor? Gustav) true)
 
+;; 14.2
+(define-struct node (ssn name left right))
+
+;; Binray Tree is
+;;  false or
+;;  (make-node soc pn lft rgt)
+;;   where soc - number, pn - symbol, lft and rgt - Binray Tree
+
+;; ex 14.2.1
+;; tree image : ch14-ex14.2.1.png
+;; contains-bt : number binary-tree -> boolean
+(define (contains-bt n b-t)
+  (cond
+    [(false? b-t) false]
+    [else
+     (or
+       (= n (node-ssn b-t))
+       (contains-bt n (node-left b-t))
+       (contains-bt n (node-right b-t)))]))
+
+;; test
+(define t1 (make-node 15 'd false (make-node 24 'i false false)))
+(define t2 (make-node 15 'd (make-node 87 'h false false) false))
+(define t3 false)
+
+(check-expect (contains-bt 15 t1) true)
+(check-expect (contains-bt 10 t1) false)
+(check-expect (contains-bt 87 t2) true)
+(check-expect (contains-bt 76 t2) false)
+(check-expect (contains-bt 15 t3) false)
+
+;; ex 14.2.2
+;; search-bt : soc binary-tree -> pn
+(define (search-bt n bt)
+  (cond
+    [(false? bt) false]
+    [(= n (node-ssn bt)) (node-name bt)]
+    [(contains-bt n (node-left bt)) (search-bt n (node-left bt))]
+    [(contains-bt n (node-right bt)) (search-bt n (node-right bt))]
+    [else false]))
+;; left, right에서 찾을때는 비효율적.
+;; left, right를 대상으로 search-bt 한 후 결과에 따라(false or node)
+;; 반환하도록 하면 검색양이 줄어들 텐데, 아직 let이 없어서...
+
+;; test
+(check-expect (search-bt 15 t1) 'd)
+(check-expect (search-bt 10 t1) false)
+(check-expect (search-bt 87 t2) 'h)
+(check-expect (search-bt 76 t2) false)
+(check-expect (search-bt 15 t3) false)
+
+;; ex 14.2.3
+;; inorder : binary-search-tree -> list-of-ssn
+(define (inorder bst)
+  (cond
+    [(false? bst) empty]
+    [else
+     (append
+      (inorder (node-left bst))
+      (list (node-ssn bst))
+      (inorder (node-right bst)))]))
+
+;; test
+(define tree-A (make-node 63 'a
+                          (make-node 29 'b
+                                     (make-node 15 'c
+                                                (make-node 10 'd false false)
+                                                (make-node 24 'e false false))
+                                     false)
+                          (make-node 89 'f
+                                     (make-node 77 'g false false)
+                                     (make-node 95 'h
+                                                false
+                                                (make-node 99 'i false false)))))
+(check-expect (inorder tree-A) (list 10 15 24 29 63 77 89 95 99))
+
+;; ex 14.2.4
+;; search-bst : number(ssn) binary-search-tree -> symbol(name) or false
+(define (search-bst n bst)
+  (cond
+    [(false? bst) false]
+    [(= n (node-ssn bst)) (node-name bst)]
+    [(> n (node-ssn bst)) (search-bst n (node-right bst))]
+    [else (search-bst n (node-left bst))])) ;; (< n (node-ssn bst))
+
+;; tests
+(check-expect (search-bst 77 tree-A) 'g)
+(check-expect (search-bst 40 tree-A) false)
+
+;; ex 14.2.5
+;; create-bst : binary-search-tree number(ssn) symbol(name) -> binary-search-tree
+(define (create-bst bst soc pn)
+  (cond
+    [(false? bst) (make-node soc pn false false)]
+    [(> soc (node-ssn bst)) (make-node (node-ssn bst) 
+                                       (node-name bst) 
+                                       (node-left bst)
+                                       (create-bst (node-right bst) soc pn))]
+    [(< soc (node-ssn bst)) (make-node (node-ssn bst) 
+                                       (node-name bst) 
+                                       (create-bst (node-left bst) soc pn)
+                                       (node-right bst))]
+    [else (error "Invalid SSN Number")]))
+
+;; tests
+(check-expect (create-bst false 66 'a) (make-node 66 'a false false))
+(check-expect (create-bst (create-bst false 66 'a) 53 'b)
+              (make-node 66 'a
+                         (make-node 53 'b false false)
+                         false))
+(check-expect (create-bst
+               (create-bst
+                (create-bst
+                 (create-bst
+                  (create-bst
+                   (create-bst 
+                    (create-bst 
+                     (create-bst
+                      (create-bst false 63 'a)
+                      29 'b)
+                     15 'c) 
+                    10 'd) 
+                   24 'e)
+                  89 'f)
+                 77 'g)
+                95 'h)
+               99 'i) tree-A)
+
+;; ex 14.2.6
+;; create-bst-from-list : list-of-number/name -> binary-search-tree
+(define (create-bst-from-list lonns)
+  (cond
+    [(empty? lonns) false]
+    [else
+     (create-bst (create-bst-from-list (rest lonns))
+                 (first (first lonns))
+                 (second (first lonns)))]))
+
+;; tests
+(define sample ;; 위에서 정의한 tree-A에 맞게 name을 변경했다. 순서는 동일.
+  '((99 i)
+    (77 g)
+    (24 e)
+    (10 d)
+    (95 h)
+    (15 c)
+    (89 f)
+    (29 b)
+    (63 a)))
+(check-expect (create-bst-from-list sample) tree-A)
+
+;; size : WP -> number
+(define (size a-wp)
+  (cond
+    [(empty? a-wp) 0]
+    [(symbol? (first a-wp)) (+ 1 (size (rest a-wp)))]
+    [else (+ (size (first a-wp)) (size (rest a-wp)))]))
+    
+;; ex 14.3.1
+;; - a-wp가 empty면 0
+;; - a-wp의 first가 symbol이면 a-wp의 rest로 size 계산한 결과에 +1
+;; - a-wp의 first가 symbol이 아니면(list)이면,
+;;   a-wp의 first에 대한 size와 rest에 size의 합
+
+;; tests
+(check-expect (size empty) 0)
+(check-expect (size (cons 'One empty)) 1)
+(check-expect (size (cons (cons 'One empty) empty)) 1)
+
+;; ex 14.3.2
+;; occurs1 : wp symbol -> number
+(define (occurs1 a-wp s)
+  (cond
+    [(empty? a-wp) 0]
+    [(symbol? (first a-wp))
+     (cond
+       [(symbol=? (first a-wp) s)
+        (+ 1 (occurs1 (rest a-wp) s))]
+       [else
+        (occurs1 (rest a-wp) s)])]
+    [else (occurs1 (rest a-wp) s)]))
+
+;; tests
+(check-expect (occurs1 empty 'One) 0)
+(check-expect (occurs1 (cons 'One empty) 'One) 1)
+(check-expect (occurs1 (cons (cons 'One empty) empty)  'One) 0)
+(check-expect (occurs1 '(One Two) 'One) 1)
+(check-expect (occurs1 '(One (Two One) (Two Three (Four One) Five)) 'One) 1)
+
+;; occurs2 : wp symbol -> number
+(define (occurs2 a-wp s)
+  (cond
+    [(empty? a-wp) 0]
+    [(symbol? (first a-wp))
+     (cond
+       [(symbol=? (first a-wp) s)
+        (+ 1 (occurs2 (rest a-wp) s))]
+       [else
+        (occurs2 (rest a-wp) s)])]
+    [else
+     (+ (occurs2 (first a-wp) s)
+        (occurs2 (rest a-wp) s))]))
+
+;; tests
+(check-expect (occurs2 empty 'One) 0)
+(check-expect (occurs2 (cons 'One empty) 'One) 1)
+(check-expect (occurs2 (cons (cons 'One empty) empty)  'One) 1)
+(check-expect (occurs2 '(One Two) 'One) 1)
+(check-expect (occurs2 '(One (Two One) (Two Three (Four One) Five)) 'One) 3)
+
+
+;; ex 14.3.3
+;; replace : symbol(new) symbol(old) wp -> wp
+(define (replace new old a-wp)
+  (cond
+    [(empty? a-wp) empty]
+    [(symbol? (first a-wp))
+     (cond
+       [(symbol=? (first a-wp) old)
+        (cons new (replace new old (rest a-wp)))]
+       [else
+        (cons (first a-wp) (replace new old (rest a-wp)))])]
+    [else
+     (cons (replace new old (first a-wp))
+           (replace new old (rest a-wp)))]))
+
+;; tests
+(check-expect (replace 'MyOne 'One empty)
+              empty)
+(check-expect (replace 'MyOne 'One '(One))
+              '(MyOne))
+(check-expect (replace 'MyOne 'One '((One)))
+              '((MyOne)))
+(check-expect (replace 'MyOne 'One '(One Two))
+              '(MyOne Two))
+(check-expect (replace 'MyOne 'One '(One (Two One) (Two Three (Four One) Five)))
+              '(MyOne (Two MyOne) (Two Three (Four MyOne) Five)))
+
+;; ex 14.3.4
+;; depth : a-wp -> number
+(define (depth a-wp)
+  (cond
+    [(empty? a-wp) 0]
+    [(symbol? (first a-wp)) (depth (rest a-wp))]
+    [else
+     (max (+ 1 (depth (first a-wp)))
+          (depth (rest a-wp)))]))
+
+;; why????
+
+;; tests
+(check-expect (depth empty) 0)
+(check-expect (depth '(One)) 0)
+(check-expect (depth '((One))) 1)
+(check-expect (depth '(One Two)) 0)
+(check-expect (depth '(One (Two Two) (Two Two (Three Three) Two))) 2)
+(check-expect (depth '(One (Two Two) (Two Two (Three (Four Four) (Four) Three) Two))) 3)
+
+;; ex 14.4.1
+(define-struct add (left right))
+(define-struct mul (left right))
+
+; scheme-exp은 다음 중 한 가지 이다.
+; 1. Number
+; 2. Symbol
+; 3. (make-add l r)
+; 4. (make-mul l r)
+;    3, 4에서 l과 r은 Scheme 표현이다.
+
+;(+ 10 -10)
+;(make-add 10 -10)
+;
+;(+ (* 20 3) 33)
+;(make-add (make-mul 20 3) 33)
+;
+;(* 3.14 (* r r))
+;(make-mul 3.14 (make-mul 'r 'r))
+;
+;(+ (* 9/5 c) 32)
+;(make-add (make-mul 9/5 'c) 32)
+;
+;(+ (* 3.14 (* o o)) (* 3.14 (* i i)))
+;(make-add (make-mul 3.14 (make-mul 'o 'o)) (make-mul 3.14 (make-mul 'i 'i)))
+
+;; ex 14.4.2
+;; numeric? : scheme-exp -> boolean
+(define (numeric? s-exp)
+  (cond
+    [(number? s-exp) true]
+    [(symbol? s-exp) false]
+    [(add? s-exp) (and (numeric? (add-left s-exp))
+                       (numeric? (add-right s-exp)))]
+    [(mul? s-exp) (and (numeric? (mul-left s-exp))
+                       (numeric? (mul-right s-exp)))]
+    [else (error "Invalid scheme expression")]))
+
+;; tests
+(check-expect (numeric? 1) true)
+(check-expect (numeric? 'x) false)
+(check-expect (numeric? (make-add 10 -10)) true)
+(check-expect (numeric? (make-add (make-mul 20 3) 33)) true)
+(check-expect (numeric? (make-mul 3.14 (make-mul 'r 'r))) false)
+(check-expect (numeric? (make-add (make-mul 9/5 'c) 32)) false)
+(check-expect (numeric? (make-add (make-mul 3.14 (make-mul 'o 'o))
+                                  (make-mul 3.14 (make-mul 'i 'i)))) false)
+(check-expect (numeric? (make-add (make-mul 3.14 (make-mul 10 10)) 
+                                  (make-mul 3.14 (make-mul 5 5)))) true)
+
+;; ex 14.4.3
+; numeric-scheme-exp은 다음 중 한 가지 이다.
+; 1. Number
+; 2. (make-add l r)
+; 3. (make-mul l r)
+;    2, 3에서 l과 r은 numeric-scheme-exp 표현이다.
+
+;; evaluate-expression : numeric-scheme-expression -> number
+(define (evaluate-expression ns-exp)
+  (cond
+    [(number? ns-exp) ns-exp]
+    [(add? ns-exp) (+ (evaluate-expression (add-left ns-exp))
+                      (evaluate-expression (add-right ns-exp)))]
+    [(mul? ns-exp) (* (evaluate-expression (mul-left ns-exp))
+                      (evaluate-expression (mul-right ns-exp)))]
+    [else
+     (error "Invalid numeric-scheme-expression" ns-exp)]))
+
+;; tests
+(check-expect (evaluate-expression 1) 1)
+(check-expect (evaluate-expression (make-add 10 -10)) 0)
+(check-expect (evaluate-expression (make-add (make-mul 20 3) 33)) 93)
+(check-expect (evaluate-expression (make-add (make-mul 3.14 (make-mul 10 10))
+                                             (make-mul 3.14 (make-mul 5 5)))) 392.5)
+(check-error (evaluate-expression 'x))
+(check-error (evaluate-expression (make-mul 3.14 (make-mul 'r 'r))))
+(check-error (evaluate-expression (make-add (make-mul 9/5 'c) 32)))
+(check-error (evaluate-expression (make-add (make-mul 3.14 (make-mul 'o 'o))
+                                            (make-mul 3.14 (make-mul 'i 'i)))))
+
+;; ex 14.4.4
+;; subst : symbol number scheme-expression -> numeric-scheme-expression
+(define (subst v n s-exp)
+  (cond
+    [(number? s-exp) s-exp]
+    [(symbol? s-exp)
+     (cond
+       [(symbol=? s-exp v) n]
+       [else s-exp])]
+    [(add? s-exp)
+     (make-add (subst v n (add-left s-exp))
+               (subst v n (add-right s-exp)))]
+    [(mul? s-exp)
+     (make-mul (subst v n (mul-left s-exp))
+               (subst v n (mul-right s-exp)))]
+    [else
+     (error "Invalid scheme-expression" s-exp)]))
+
+;; tests     
+(check-expect (subst 'x 10 'x) 10)
+(check-expect (subst 'r 3 (make-mul 3.14 (make-mul 'r 'r)))
+              (make-mul 3.14 (make-mul 3 3)))
+(check-expect (subst 'c 10 (make-add (make-mul 9/5 'c) 32))
+              (make-add (make-mul 9/5 10) 32))
+(check-expect (subst 'o 5 (make-add (make-mul 3.14 (make-mul 'o 'o))
+                                    (make-mul 3.14 (make-mul 'i 'i))))
+              (make-add (make-mul 3.14 (make-mul 5 5))
+                        (make-mul 3.14 (make-mul 'i 'i))))

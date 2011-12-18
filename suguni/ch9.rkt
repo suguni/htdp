@@ -197,7 +197,7 @@ empty
   (cond
     [(empty? prices) true]
     [else
-     (and (< (first prices) 1)
+     (and (<= (first prices) 1)
           (dollar-store? (rest prices)))]))
 
 'ex-9.5.3-test
@@ -209,7 +209,7 @@ empty
   (cond
     [(empty? prices) true]
     [else
-     (and (< (first prices) threshold)
+     (and (<= (first prices) threshold)
           (general-dollar-store? (rest prices) threshold))]))
 
 'ex-9.5.3-general-test
@@ -276,6 +276,9 @@ empty
   (cond
     [(empty? prices) 0]
     [else (/ (sum prices) (how-many-numbers prices))]))
+
+;; Iterative Refinement ???
+;; ====
 
 ;; ex 9.5.8
 ;; draw-circles : posn, list-of-numbers -> boolean

@@ -247,4 +247,133 @@
 (check-expect (eye-colors d) (list 'black 'red 'green 'blue 'black 'blue))
 (check-expect (eye-colors Carl) (list 'green 'yellow 'black 'blue 'brown))
 
-;; ch 15.2
+;; ch 15.3
+
+;A Web-page (short: WP) is a structure:
+; (make-wp h p) 
+;where h is a symbol and p is a (Web) document.
+;
+;A (Web) document is either
+; 1. empty,
+; 2. (cons s p)
+;    where s is a symbol and p is a document, or
+; 3. (cons w p)
+;    where w is a Web page and p is a document.
+
+(define-struct wp (header body))
+
+;; ex 15.3.1
+;; size : wp -> #symbol(number)
+(define (size a-wp)
+  (+ (size-body (wp-body a-wp))))
+
+;; size-body : web-document -> #symbol(number)
+(define (size-body wd)
+  (cond
+    [(empty? wd) 1]
+    [(symbol? (first wd)) (+ 1 (size-body (rest wd)))]
+    [(wp? (first wd)) (+ (size (first wd)) (size-body (rest wd)))]))
+
+;; test
+(define wp1 (make-wp 'top-title (list 'hello 'top 'page)))
+(define wp2 (make-wp 'sub1-title (list 'hello 'sub1 'page wp1 'hi 'sub1)))
+(check-expect (size wp1) 4)
+(check-expect (size wp2) 10)
+
+;; ex 15.3.2
+;; wp-to-file : wp -> list-of-symbols
+(define (wp-to-file a-wp)
+  (cons (wp-header a-wp)
+        (wp-to-file-body (wp-body a-wp))))
+
+;; wp-to-file-body : document -> list-of-symbols
+(define (wp-to-file-body wd)
+  (cond
+    [(empty? wd) empty]
+    [(symbol? (first wd))
+     (cons (first wd)
+           (wp-to-file-body (rest wd)))]
+    [(wp? (first wd))
+     (cons (wp-header (first wd))
+           (wp-to-file-body (rest wd)))]))
+
+;; test
+(check-expect (wp-to-file wp1) (list 'top-title 'hello 'top 'page))
+(check-expect (wp-to-file wp2) (list 'sub1-title 'hello 'sub1 'page 'top-title 'hi 'sub1))
+
+;; ex 15.3.3
+;; occurs : symbol wp -> boolean
+(define (occurs s a-wp)
+  (or 
+   (symbol=? s (wp-header a-wp))
+   (occurs-body s (wp-body a-wp))))
+
+;; occurs-body : symbol document -> boolean
+(define (occurs-body s wd)
+  (cond
+    [(empty? wd) false]
+    [(symbol? (first wd)) (or (symbol=? s (first wd))
+                              (occurs-body s (rest wd)))]
+    [(wp? (first wd)) (or (occurs s (first wd))
+                          (occurs-body s (rest wd)))]))
+
+;; test
+(check-expect (occurs 'hello wp1) true)
+(check-expect (occurs 'hi wp1) false)
+(check-expect (occurs 'hi wp2) true)
+(check-expect (occurs 'good wp2) false)
+
+;; ex 15.3.4 -- too complex. right???
+;; find : symbol wp -> list-of-headers or false
+(define (find s a-wp)
+  (cond
+    [(occurs? s a-wp) (find-body s (wp-header a-wp) (wp-body a-wp))]
+    [else false]))
+
+;; find-body : symbol document -> list-of-headers
+(define (find-body s h wd)
+  (cond
+    [(empty? wd) empty]
+    [(symbol? (first wd))
+     (cond 
+       [(symbol=? s (first wd))
+        (cons h (find-body s h (next-wp (rest wd))))]
+       [else (find-body s h (rest wd))])]
+    [(wp? (first wd))
+     (cond
+       [(occurs? s (first wd)) (append (find s (first wd))
+                                       (find-body s h (rest wd)))]
+       [else (find-body s h (rest wd))])]))
+
+;; next-wp : document -> document
+(define (next-wp wd)
+  (cond
+    [(empty? wd) empty]
+    [(wp? (first wd)) wd]
+    [else (next-wp (rest wd))]))
+
+;; test
+(check-expect (next-wp (wp-body wp1)) empty)
+(check-expect (next-wp (rest (wp-body wp2))) (list wp1 'hi 'sub1))
+
+;; occurs? : symbol wp -> boolean
+(define (occurs? s a-wp)
+   (occurs-body? s (wp-body a-wp)))
+
+;; occurs-d-body : symbol document -> boolean
+(define (occurs-body? s wd)
+  (cond
+    [(empty? wd) false]
+    [(symbol? (first wd)) (or (symbol=? s (first wd))
+                              (occurs-body? s (rest wd)))]
+    [(wp? (first wd)) (or (occurs? s (first wd))
+                          (occurs-body? s (rest wd)))]))
+
+;; tests
+(check-expect (find 'hello wp1) (list 'top-title))
+(check-expect (find 'page wp1) (list 'top-title))
+(check-expect (find 'hi wp1) false)
+(check-expect (find 'hi wp2) (list 'sub1-title))
+(check-expect (find 'good wp2) false)
+(check-expect (find 'page wp2) (list 'sub1-title 'top-title))
+

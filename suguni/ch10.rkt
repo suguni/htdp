@@ -36,7 +36,7 @@
             (hours->wages-2 (rest lon)))])]))
 
 ;; test
-;; (hours->wages-2 (cons 10 (cons 20 (cons 150 (cons 80 empty))))) ;; error
+(check-error (hours->wages-2 (cons 10 (cons 20 (cons 150 (cons 80 empty))))))
 
 ;; ex 10.1.3
 ;; Fahrenheit->Celsius : number -> number
@@ -52,9 +52,9 @@
            (convertFC (rest lon)))]))
 
 ;; test
-;; (convertFC empty) ;; empty
-;; (convertFC (cons 32 empty)) ;; (cons 0 empty)
-;; (convertFC (cons 32 (cons 41 empty))) ;; (cons 0 (cons 5 emtpy))
+(check-expect (convertFC empty) empty)
+(check-expect (convertFC (cons 32 empty)) (cons 0 empty))
+(check-expect (convertFC (cons 32 (cons 41 empty))) (cons 0 (cons 5 empty)))
 
 ;; ex 10.1.4
 ;; convert-euro : list-of-numbers -> list-of-numbers
@@ -65,7 +65,8 @@
      (cons (* 1.22 (first lon))
            (convert-euro (rest lon)))]))
 ;; test
-;; (convert-euro (cons 1 (cons 2 empty))) ;; (cons 1.22 (cons 2.44 empty))
+(check-expect (convert-euro (cons 1 (cons 2 empty)))
+              (cons 1.22 (cons 2.44 empty)))
 
 ;; convert-euro-1 : number, list-of-numbers -> list-of-numbers
 (define (convert-euro-1 ratio lon)
@@ -75,7 +76,8 @@
      (cons (* ratio (first lon))
            (convert-euro-1 ratio (rest lon)))]))
 ;; test
-;; (convert-euro-1 1.5 (cons 1 (cons 2 empty))) ;; (cons 1.5 (cons 3 empty))
+(check-expect (convert-euro-1 1.5 (cons 1 (cons 2 empty)))
+              (cons 1.5 (cons 3 empty)))
 
 ;; ex 10.1.5
 ;; eliminate-exp : number, list-of-numbers -> list-of-numbers
@@ -90,8 +92,8 @@
         (eliminate-exp ua (rest lotp))])]))
 
 ;; test
-;; (eliminate-exp 1.0 (cons 2.95 (cons .95 (cons 1.0 (cons 5 empty)))))
-;; => (cons .95 (cons 1.0 empty))
+(check-expect (eliminate-exp 1.0 (cons 2.95 (cons .95 (cons 1.0 (cons 5 empty)))))
+              (cons .95 (cons 1.0 empty)))
 
 ;; ex 10.1.6
 ;; name-robot : list-of-symbols -> list-of-symbols
@@ -105,10 +107,11 @@
         [else (first los)])
       (name-robot (rest los)))]))
 ;; test
-;(name-robot empty) ;; empty
-;(name-robot (cons 'kitty empty)) ;; (cons 'kitty empty)
-;(name-robot (cons 'kitty (cons 'robot (cons 'mazinga (cons 'robot empty)))))
-;; => (cons 'kitty (cons 'r2d2 (cons 'mazinga (cons 'r2d2 empty))))
+(check-expect (name-robot empty) empty)
+(check-expect (name-robot (cons 'kitty empty))
+              (cons 'kitty empty))
+(check-expect (name-robot (cons 'kitty (cons 'robot (cons 'mazinga (cons 'robot empty)))))
+              (cons 'kitty (cons 'r2d2 (cons 'mazinga (cons 'r2d2 empty)))))
 
 ;; substitute : symbol symbol list-of-symbols -> list-of-symbols
 (define (substitute new old los)
@@ -122,10 +125,11 @@
       (substitute new old (rest los)))]))
 
 ;; test
-;(substitute 'r2d2 'robot empty) ;; empty
-;(substitute 'magic 'kitty (cons 'kitty empty)) ;; (cons 'magic empty)
-;(substitute 'r2d2 'mazinga (cons 'kitty (cons 'robot (cons 'mazinga (cons 'robot empty)))))
-;; => (cons 'kitty (cons 'robot (cons 'r2d2 (cons 'robot empty))))
+(check-expect (substitute 'r2d2 'robot empty) empty)
+(check-expect (substitute 'magic 'kitty (cons 'kitty empty))
+              (cons 'magic empty))
+(check-expect (substitute 'r2d2 'mazinga (cons 'kitty (cons 'robot (cons 'mazinga (cons 'robot empty)))))
+              (cons 'kitty (cons 'robot (cons 'r2d2 (cons 'robot empty)))))
 
 ;; ex 10.1.7
 ;; recall : symbol list-of-symbols -> list-of-symbols
@@ -138,23 +142,22 @@
        [else (cons (first lon) (recall ty (rest lon)))])]))
 
 ;; test
-;; (recall 'robot (cons 'robot (cons 'doll (cons 'dress empty))))
-;; => (cons 'doll (cons 'dress empty))
+(check-expect (recall 'robot (cons 'robot (cons 'doll (cons 'dress empty))))
+              (cons 'doll (cons 'dress empty)))
 
 ;; ex 10.1.8
-
-;; Test set
-;; (how-many 0 2 1)  => -1
-;; (how-many 1 0 -1) => 2
-;; (how-many 2 4 2)  => 1
-;; (how-many 1 0 1)  => 0
-
 (define (how-many a b c)
   (cond
     [(= a 0) -1]
     [(> (* b b) (* 4 a c)) 2]
     [(= (* b b) (* 4 a c)) 1]
     [(< (* b b) (* 4 a c)) 0]))
+
+;; Test set
+(check-expect (how-many 0 2 1) -1)
+(check-expect (how-many 1 0 -1) 2)
+(check-expect (how-many 2 4 2) 1)
+(check-expect (how-many 1 0 1) 0)
 
 ;; quadratic-roots : number number number -> symbol or number of list-of-numbers
 (define (quadratic-roots a b c)
@@ -170,10 +173,10 @@
        empty))]))
 
 ;; test
-;(quadratic-roots 0 2 1)  ;; 'degenerate
-;(quadratic-roots 1 0 -1) ;; (cons 1 (cons -1 empty))
-;(quadratic-roots 2 4 2)  ;; -1
-;(quadratic-roots 1 0 1)  ;; 'none
+(check-expect (quadratic-roots 0 2 1) 'degenerate)
+(check-expect (quadratic-roots 1 0 -1) (cons 1 (cons -1 empty)))
+(check-expect (quadratic-roots 2 4 2) -1)
+(check-expect (quadratic-roots 1 0 1) 'none)
 
 ;; ex 10.1.9
 
@@ -197,6 +200,14 @@
 
 ;; 0 dollars?
 ;; and 0 cents(or cent)?
+
+;; tests
+(check-expect (controller 103)
+              (cons 1 (cons 'dollar (cons 'and (cons 3 (cons 'cents empty))))))
+
+;; Questions
+;; (controller 100) ;;=> (cons 1 (cons 'dollar empty)) or (cons 1 (cons 'dollar (cons 'and (cons 0 (cons 'cent empty)))))
+;; (controller 0) ;; => ???
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -234,13 +245,13 @@
      [else (contains-doll? (rest an-inv))])]))
 ;; test
 ;; true
-(boolean=? (contains-doll? (cons (make-ir 'robot 22.05)
-                                 (cons (make-ir 'doll 17.95)
-                                       empty))) true)
+(check-expect (contains-doll? (cons (make-ir 'robot 22.05)
+                                    (cons (make-ir 'doll 17.95)
+                                          empty))) true)
 ;; false
-(boolean=? (contains-doll? (cons (make-ir 'robot 22.05)
-                                 (cons (make-ir 'lego 17.95)
-                                       empty))) false)
+(check-expect (contains-doll? (cons (make-ir 'robot 22.05)
+                                    (cons (make-ir 'lego 17.95)
+                                          empty))) false)
 
 ;; ex 10.2.2
 ;; ch10-ex10.2.2.rkt
@@ -257,10 +268,10 @@
        [else (price-of toy (rest an-inv))])]))
 
 ;; test
-'ex-10.2.3
-(= (price-of 'doll (cons (make-ir 'robot 22.05)
-                         (cons (make-ir 'doll 17.95)
-                               empty))) 17.95)
+(check-expect (price-of 'doll (cons (make-ir 'robot 22.05)
+                                    (cons (make-ir 'doll 17.95)
+                                          empty)))
+              17.95)
 
 ;; ex 10.2.3
 
@@ -283,8 +294,8 @@
                            (cons (make-pr 'bizen-lee '010-4847-0337)
                                  empty)))
 ;; test
-(whose-number '010-4206-2688 my-phone-dir) ;;  => 'steve-yu
-(whose-number '010-1234-2688 my-phone-dir) ;;  => empty
+(check-expect (whose-number '010-4206-2688 my-phone-dir) 'steve-yu)
+(check-expect (whose-number '010-1234-2688 my-phone-dir) empty)
 
 ;; phone-number : name phone-directory -> phone-number
 (define (phone-number name phone-directory)
@@ -298,8 +309,8 @@
         (phone-number name (rest phone-directory))])]))
 
 ;; test
-(phone-number 'bizen-lee my-phone-dir)  ;;  => '010-4847-0337
-(phone-number 'steve-jobs my-phone-dir) ;;  => empty
+(check-expect (phone-number 'bizen-lee my-phone-dir) '010-4847-0337)
+(check-expect (phone-number 'steve-jobs my-phone-dir) empty)
 
 ;; p171
 
@@ -322,10 +333,10 @@
        [else (extract1 (rest an-inv))])]))
 
 ;; test
-(extract1 my-inv) ;; =>
-(cons (make-ir 'dagger .95)
-      (cons (make-ir 'key-chain .55)
-            empty))
+(check-expect (extract1 my-inv) ;; =>
+              (cons (make-ir 'dagger .95)
+                    (cons (make-ir 'key-chain .55)
+                          empty)))
 
 ;; ex 10.2.5
 ;; extract>1 : inventory => inventory
@@ -339,10 +350,10 @@
        [else (extract>1 (rest an-inv))])]))
 
 ;; test
-(extract>1 my-inv) ;; =>
-(cons (make-ir 'Barbie 17.95)
-      (cons (make-ir 'robot 22.05)
-            empty))
+(check-expect (extract>1 my-inv) ;; =>
+              (cons (make-ir 'Barbie 17.95)
+                    (cons (make-ir 'robot 22.05)
+                          empty)))
 
 ;; ex 10.2.6
 ;; inventory1
@@ -361,10 +372,10 @@
          (extract1-1 (rest an-inv)))]
        [else (extract1-1 (rest an-inv))])]))
 
-(extract1-1 my-inv)
-(cons (make-ir1 'dagger .95)
-      (cons (make-ir1 'key-chain .55)
-            empty))
+(check-expect (extract1-1 my-inv)
+              (cons (make-ir1 'dagger .95)
+                    (cons (make-ir1 'key-chain .55)
+                          empty)))
 
 ;; ex 10.2.7
 ;; raise-prices : inventory -> inventory
@@ -373,16 +384,16 @@
     [(empty? an-inv) empty]
     [else
      (cons 
-      (make-pr (ir-name (first an-inv)) (* (ir-price (first an-inv)) 1.05))
+      (make-ir (ir-name (first an-inv)) (* (ir-price (first an-inv)) 1.05))
       (raise-prices (rest an-inv)))]))
 
 ;; test
-(raise-prices my-inv) ;; =>
-(cons (make-ir 'dagger .9975)
-        (cons (make-ir 'Barbie 18.8475)
-              (cons (make-ir 'key-chain .5775)
-                    (cons (make-ir 'robot 23.1525)
-                          empty))))
+(check-expect (raise-prices my-inv) ;; =>
+              (cons (make-ir 'dagger .9975)
+                    (cons (make-ir 'Barbie 18.8475)
+                          (cons (make-ir 'key-chain .5775)
+                                (cons (make-ir 'robot 23.1525)
+                                      empty)))))
 
 ;; ex 10.2.8
 ;; recall-1 : symbol inventory -> inventory
@@ -395,11 +406,11 @@
        [else (cons (first lon) (recall-1 ty (rest lon)))])]))
 
 ;; test
-(recall-1 'robot my-inv)
-(cons (make-ir 'dagger .95)
-      (cons (make-ir 'Barbie 17.95)
-            (cons (make-ir 'key-chain .55)
-                  empty)))
+(check-expect (recall-1 'robot my-inv)
+              (cons (make-ir 'dagger .95)
+                    (cons (make-ir 'Barbie 17.95)
+                          (cons (make-ir 'key-chain .55)
+                                empty))))
 
 ;; ex 10.2.9
 
@@ -416,12 +427,12 @@
       (name-robot-1 (rest los)))]))
 
 ;; test
-(name-robot-1 my-inv)
-(cons (make-ir 'dagger .95)
-      (cons (make-ir 'Barbie 17.95)
-            (cons (make-ir 'key-chain .55)
-                  (cons (make-ir 'r2d2 22.05)
-                        empty))))
+(check-expect (name-robot-1 my-inv)
+              (cons (make-ir 'dagger .95)
+                    (cons (make-ir 'Barbie 17.95)
+                          (cons (make-ir 'key-chain .55)
+                                (cons (make-ir 'r2d2 22.05)
+                                      empty)))))
 
 ;; substitute-1 : symbol symbol inventory -> inventory
 (define (substitute-1 new old los)
@@ -436,12 +447,12 @@
       (substitute-1 new old (rest los)))]))
 
 ;; test
-(substitute-1 'Cabbage 'Barbie my-inv)
-(cons (make-ir 'dagger .95)
-      (cons (make-ir 'Cabbage 17.95)
-            (cons (make-ir 'key-chain .55)
-                  (cons (make-ir 'robot 22.05)
-                        empty))))
+(check-expect (substitute-1 'Cabbage 'Barbie my-inv)
+              (cons (make-ir 'dagger .95)
+                    (cons (make-ir 'Cabbage 17.95)
+                          (cons (make-ir 'key-chain .55)
+                                (cons (make-ir 'robot 22.05)
+                                      empty)))))
 
 ;; ex 10.3.1
 
@@ -610,8 +621,8 @@
     [else picture]))
 
 ;; test
-(start 500 100)
-(draw-losh
- (move-picture -5
-               (move-picture 23
-                             (move-picture 10 FACE))))
+;(start 500 100)
+;(draw-losh
+; (move-picture -5
+;               (move-picture 23
+;                             (move-picture 10 FACE))))

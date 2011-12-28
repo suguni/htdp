@@ -24,3 +24,24 @@
 
 ;ex.10.2.1
 (define-struct ir (name price))
+(define-struct ir2 (name price pic))
+
+;ex.10.2.2
+(define (show-picture toy an-ir2)
+  (cond
+    [(empty? an-ir2) false]
+    [(symbol=? toy (ir2-name (first an-ir2))) (ir2-pic (first an-ir2))]
+    [else (show-picture toy (rest an-ir2))]))
+
+;ex.10.2.4
+(define-struct contact (name tel))
+(define (whose-number a-tel an-contact)
+  (cond [(empty? an-contact) empty]
+        [(symbol=? a-tel (contact-tel (first an-contact))) (contact-name (first an-contact))]
+        [else (whose-number a-tel (rest an-contact))]))
+(define (phone-number a-name an-contact)
+  (cond [(empty? an-contact) empty]
+        [(symbol=? a-name (contact-name (first an-contact))) (contact-tel (first an-contact))]
+        [else (phone-number a-name (rest an-contact))]))
+
+;ex.10.2.5

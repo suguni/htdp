@@ -27,13 +27,9 @@
 (define (hours->wages-2 lon)
   (cond
     [(empty? lon) empty]
-    [else
-     (cond
-       [(> (first lon) 100)
-        (error 'hours->wages "too many hours")]
-       [else
-        (cons (wage (first lon))
-            (hours->wages-2 (rest lon)))])]))
+    [(> (first lon) 100) (error 'hours->wages "too many hours")]
+    [else (cons (wage (first lon))
+            (hours->wages-2 (rest lon)))]))
 
 ;; test
 (check-error (hours->wages-2 (cons 10 (cons 20 (cons 150 (cons 80 empty))))))
@@ -57,12 +53,16 @@
 (check-expect (convertFC (cons 32 (cons 41 empty))) (cons 0 (cons 5 empty)))
 
 ;; ex 10.1.4
+
+(define (dollar->euro dollar)
+  (* dollar 1.22))
+
 ;; convert-euro : list-of-numbers -> list-of-numbers
 (define (convert-euro lon)
   (cond
     [(empty? lon) empty]
     [else
-     (cons (* 1.22 (first lon))
+     (cons (dollar->euro (first lon))
            (convert-euro (rest lon)))]))
 ;; test
 (check-expect (convert-euro (cons 1 (cons 2 empty)))
@@ -84,12 +84,8 @@
 (define (eliminate-exp ua lotp)
   (cond
     [(empty? lotp) empty]
-    [else
-     (cond
-       [(>= ua (first lotp))
-        (cons (first lotp) (eliminate-exp ua (rest lotp)))]
-       [else
-        (eliminate-exp ua (rest lotp))])]))
+    [(>= ua (first lotp)) (cons (first lotp) (eliminate-exp ua (rest lotp)))]
+    [else (eliminate-exp ua (rest lotp))]))
 
 ;; test
 (check-expect (eliminate-exp 1.0 (cons 2.95 (cons .95 (cons 1.0 (cons 5 empty)))))
@@ -100,12 +96,11 @@
 (define (name-robot los)
   (cond
     [(empty? los) empty]
+    [(symbol=? (first los) 'robot)
+     (cons 'r2d2 (name-robot (rest los)))]
     [else
-     (cons
-      (cond
-        [(symbol=? (first los) 'robot) 'r2d2]
-        [else (first los)])
-      (name-robot (rest los)))]))
+     (cons (first los) (name-robot (rest los)))]))
+
 ;; test
 (check-expect (name-robot empty) empty)
 (check-expect (name-robot (cons 'kitty empty))
@@ -117,12 +112,8 @@
 (define (substitute new old los)
   (cond
     [(empty? los) empty]
-    [else
-     (cons
-      (cond
-        [(symbol=? (first los) old) new]
-        [else (first los)])
-      (substitute new old (rest los)))]))
+    [(symbol=? (first los) old) (cons new (substitute new old (rest los)))]
+    [else (cons (first los) (substitute new old (rest los)))]))
 
 ;; test
 (check-expect (substitute 'r2d2 'robot empty) empty)
@@ -136,10 +127,8 @@
 (define (recall ty lon)
   (cond
     [(empty? lon) empty]
-    [else
-     (cond 
-       [(symbol=? (first lon) ty) (recall ty (rest lon))]
-       [else (cons (first lon) (recall ty (rest lon)))])]))
+    [(symbol=? (first lon) ty) (recall ty (rest lon))]
+    [else (cons (first lon) (recall ty (rest lon)))]))
 
 ;; test
 (check-expect (recall 'robot (cons 'robot (cons 'doll (cons 'dress empty))))
@@ -187,16 +176,26 @@
 
 ;; contoller: number -> list
 (define (controller money)
-  (cons (quotient money 100)
-        (cons (cond
-                [(= (quotient money 100) 1) 'dollar]
-                [else 'dollars])
-              (cons 'and
-                    (cons (remainder money 100)
-                          (cons (cond
-                                  [(= (remainder money 100) 1) 'cent]
-                                  [else 'cents])
-                                empty))))))
+  (list (quotient money 100)
+        (cond
+          [(= (quotient money 100) 1) 'dollar]
+          [else 'dollars])
+        'and
+        (remainder money 100)
+        (cond
+          [(= (remainder money 100) 1) 'cent]
+          [else 'cents])))
+
+;  (cons (quotient money 100)
+;        (cons (cond
+;                [(= (quotient money 100) 1) 'dollar]
+;                [else 'dollars])
+;              (cons 'and
+;                    (cons (remainder money 100)
+;                          (cons (cond
+;                                  [(= (remainder money 100) 1) 'cent]
+;                                  [else 'cents])
+;                                empty))))))
 
 ;; 0 dollars?
 ;; and 0 cents(or cent)?
@@ -239,12 +238,10 @@
 (define (contains-doll? an-inv)
   (cond
    [(empty? an-inv) false]
-   [else
-    (cond
-     [(symbol=? (ir-name (first an-inv)) 'doll) true]
-     [else (contains-doll? (rest an-inv))])]))
+   [(symbol=? (ir-name (first an-inv)) 'doll) true]
+   [else (contains-doll? (rest an-inv))]))
+
 ;; test
-;; true
 (check-expect (contains-doll? (cons (make-ir 'robot 22.05)
                                     (cons (make-ir 'doll 17.95)
                                           empty))) true)
@@ -257,8 +254,7 @@
 ;; ch10-ex10.2.2.rkt
 
 ;; ex 10.2.3
-;; contains-doll? : list-of-inv -> boolean
-;; to determine whether the symbol 'doll occurs on ir
+;; price-of : symbol list-of-inv -> number
 (define (price-of toy an-inv)
   (cond
     [(empty? an-inv) false]
@@ -273,7 +269,7 @@
                                           empty)))
               17.95)
 
-;; ex 10.2.3
+;; ex 10.2.4
 
 ;; phone record
 (define-struct pr (name pn))
@@ -400,10 +396,8 @@
 (define (recall-1 ty lon)
   (cond
     [(empty? lon) empty]
-    [else
-     (cond
-       [(symbol=? (ir-name (first lon)) ty) (recall-1 ty (rest lon))]
-       [else (cons (first lon) (recall-1 ty (rest lon)))])]))
+    [(symbol=? (ir-name (first lon)) ty) (recall-1 ty (rest lon))]
+    [else (cons (first lon) (recall-1 ty (rest lon)))]))
 
 ;; test
 (check-expect (recall-1 'robot my-inv)
@@ -621,8 +615,8 @@
     [else picture]))
 
 ;; test
-;(start 500 100)
-;(draw-losh
-; (move-picture -5
-;               (move-picture 23
-;                             (move-picture 10 FACE))))
+(start 500 100)
+(draw-losh
+ (move-picture -5
+               (move-picture 23
+                             (move-picture 10 FACE))))

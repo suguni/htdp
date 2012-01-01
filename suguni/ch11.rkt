@@ -9,8 +9,8 @@
     [else (cons s (repeat (sub1 n) s))]))
 
 ;; test
-(repeat 0 'hello) ;; => empty
-(repeat 2 'a) ;; (cons 'a (cons 'a empty))
+(check-expect (repeat 0 'hello) empty)
+(check-expect (repeat 2 'a) (cons 'a (cons 'a empty)))
 
 ;; ex 11.2.2
 
@@ -29,14 +29,10 @@
            (tabulate-f (sub1 n)))]))
 
 ;; test
-(tabulate-f 0) ;; =>
-empty
-
-(tabulate-f 2) ;; =>
-(cons (make-posn 2 (f 2))
-      (cons (make-posn 1 (f 1))
-            empty))
-
+(check-expect (tabulate-f 0) empty)
+(check-expect (tabulate-f 2) (cons (make-posn 2 (f 2))
+                                   (cons (make-posn 1 (f 1))
+                                         empty)))
 
 ;; ex 11.2.3
 
@@ -139,26 +135,15 @@ empty
 ;; depth : deep-list -> number
 (define (depth dl)
   (cond
-    [(empty? dl) 0]
     [(symbol? dl) 0]
     [else
      (add1 (depth (first dl)))]))
 
-;; example
-(= (depth empty) 0) ;; X
-(= (depth 's) 0)
-(= (depth (cons 's empty)) 1)
-(= (depth (cons (cons 's empty) empty)) 2)
-(= (depth (cons (cons (cons (cons 's empty) empty) empty) empty)) 4)
-;(add1 (depth (cons (cons (cons 's empty) empty) empty)))
-;(add1 (add1 (depth (cons (cons 's empty) empty))))
-;(add1 (add1 (add1 (depth (cons 's empty)))))
-;(add1 (add1 (add1 (add1 (depth empty)))))
-;(add1 (add1 (add1 (add1 0))))
-;(add1 (add1 (add1 1)))
-;(add1 (add1 2))
-;(add1 3)
-;4
+;; test
+(check-expect (depth 's) 0)
+(check-expect (depth (cons 's empty)) 1)
+(check-expect (depth (cons (cons 's empty) empty)) 2)
+(check-expect (depth (cons (cons (cons (cons 's empty) empty) empty) empty)) 4)
 
 ;; make-deep : symbol natural-number -> deep-list
 (define (make-deep s n)
@@ -168,8 +153,8 @@ empty
      (cons (make-deep s (sub1 n)) empty)]))
 
 ;; example
-(make-deep 'y 3) ;; =>
-(cons (cons (cons 'y empty) empty) empty)
+(check-expect (make-deep 'y 3)
+              (cons (cons (cons 'y empty) empty) empty))
 
 ;; ex 11.3.1
 (define (random-n-m n m)
@@ -226,14 +211,14 @@ empty
   (cond
     [(empty? prices) true]
     [else
-     (and (< (first prices) 1)
+     (and (<= (first prices) 1)
           (dollar-store? (rest prices)))]))
 
 (dollar-store? (create-prices 20))
 
 ;; ex 11.3.5
-(define canvas-width 120)
-(define canvas-height 120)
+(define canvas-width 300)
+(define canvas-height 300)
 (define row-size 25)
 (define col-size 25)
 ;; draw-board : number -> true

@@ -94,3 +94,18 @@
     [else (cons (make-posn n (f n)) (tabulate-f-up-to-20 (sub1 n)))]))
 
 ;;ex.11.4.7
+(define (is-not-divisible-by<=i i m)
+  (cond
+    [(= 1 i) true]
+    [(= 0 (remainder m i)) false]
+    [else (is-not-divisible-by<=i (sub1 i) m)]))
+
+(is-not-divisible-by<=i 2 7)
+(is-not-divisible-by<=i 3 12)
+
+(define (prime? n)
+  (cond
+    [(= 0 (remainder n 2)) (is-not-divisible-by<=i (/ n 2) n)]
+    [else (is-not-divisible-by<=i (/ (- n 1) 2) n)]))
+
+;;ex.11.5.1

@@ -257,7 +257,26 @@
     [else (* n (! (sub1 n)))]))
 
 ;; ex 11.4.1
-;(! 2)    ;; => 2
+;(! 2)    ;; => 2*1 = 2
+;(! 2)
+;(cond
+;  [(zero? 2) 1]
+;  [else (* 2 (! (sub1 2)))])
+;(* 2 (! (sub1 2)))
+;(* 2 (! 1))
+;(* 2
+;   (cond
+;     [(zero? 1) 1]
+;     [else (* 1 (! (sub1 1)))]))
+;(* 2
+;   (* 1 (! (sub1 1))))
+;(* 2 (* 1 (! 0)))
+;(* 2 (* 1 
+;        (cond
+;          [(zero? 0) 1]
+;          [else ...])))
+;(* 2 (* 1 1))
+;2
 ;(! 10)   ;; => 3628800
 ;(! 100)  ;; => 93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000
 ;(! 1000) ;; 402387260077093773543702433923003985719374864210714632543799910429938512398629020592044208486969404800479988610197196058631666872994808558901323829669944590997424504087073759918823627727188732519779505950995276120874975462497043601418278094646496291056393887437886487337119181045825783647849977012476632889835955735432513185323958463075557409114262417474349347553428646576611667797396668820291207379143853719588249808126867838374559731746136085379534524221586593201928090878297308431392844403281231558611036976801357304216168747609675871348312025478589320767169132448426236131412508780208000261683151027341827977704784635868170164365024153691398281264810213092761244896359928705114964975419909342221566832572080821333186116811553615836546984046708975602900950537616475847728421889679646244945160765353408198901385442487984959953319101723355556602139450399736280750137837615307127761926849034352625200015888535147331611702103968175921510907788019393178114194545257223865541461062892187960223838971476088506276862967146674697562911234082439208160153780889893964518263243671616762179168909779911903754031274622289988005195444414282012187361745992642956581746628302955570299024324153181617210465832036786906117260158783520751516284225540265170483304226143974286933061690897968482590125458327168226458066526769958652682272807075781391858178889652208164348344825993266043367660176999612831860788386150279465955131156552036093988180612138558600301435694527224206344631797460594682573103790084024432438465657245014402821885252470935190620929023136493273497565513958720559654228749774011413346962715422845862377387538230483865688976461927383814900140767310446640259899490222221765904339901886018566526485061799702356193897017860040811889729918311021171229845901641921068884387121855646124960798722908519296819372388642614839657382291123125024186649353143970137428531926649875337218940694281434118520158014123344828015051399694290153483077644569099073152433278288269864602789864321139083506217095002597389863554277196742822248757586765752344220207573630569498825087968928162753848863396909959826280956121450994871701244516461260379029309120889086942028510640182154399457156805941872748998094254742173582401063677404595741785160829230135358081840096996372524230560855903700624271243416909004153690105933983835777939410970027753472000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -300,19 +319,22 @@
 
 ;; ex 11.4.5
 ;; tabulate-f-lim number[limit] number[>=limit] => list-of-posn
-(define (tabulate-f-lim n limit)
+(define (tabulate-f-lim limit n)
   (cond
-    [(<= limit n) empty]
+    [(= limit n) empty]
     [else
-     (cons (make-posn limit (f limit))
-           (tabulate-f-lim n (sub1 limit)))]))
+     (cons (make-posn n (f n))
+           (tabulate-f-lim limit (sub1 n)))]))
 
 ;; tests
-(tabulate-f-lim 20 20) ;; empty
-(tabulate-f-lim 20 22) ;; =>
-(cons (make-posn 22 (f 22))
-      (cons (make-posn 21 (f 21)) empty))
-(tabulate-f-lim 0 3)
+(check-expect (tabulate-f-lim 20 20) empty)
+(check-expect (tabulate-f-lim 20 22) 
+              (cons (make-posn 22 (f 22))
+                    (cons (make-posn 21 (f 21)) empty)))
+(check-expect (tabulate-f-lim 0 3)
+              (cons (make-posn 3 (f 3))
+                    (cons (make-posn 2 (f 2))
+                          (cons (make-posn 1 (f 1)) empty))))
 
 ;; ex 11.4.6
 ;; tabulate-f-up-to-20 : Number[<= 20] => number
@@ -323,9 +345,9 @@
      (cons (make-posn n (f n))
            (tabulate-f-up-to-20 (add1 n)))]))
 ;; tests
-(tabulate-f-up-to-20 18)
-(cons (make-posn 18 (f 18))
-      (cons (make-posn 19 (f 19)) empty))
+(check-expect (tabulate-f-up-to-20 18)
+              (cons (make-posn 18 (f 18))
+                    (cons (make-posn 19 (f 19)) empty)))
 
 ;; ex 11.4.7
 ;; is-not-divisible-by<=i : i[i >= 1] m[i < m] => boolean
@@ -337,17 +359,18 @@
       [(= (remainder m i) 0) false]
       [else (is-not-divisible-by<=i (sub1 i) m)])]))
 
-(is-not-divisible-by<=i 2 3)  ;; true
-(is-not-divisible-by<=i 7 8)  ;; false
-(is-not-divisible-by<=i 9 11) ;; true
+(check-expect (is-not-divisible-by<=i 2 3) true)
+(check-expect (is-not-divisible-by<=i 7 8) false)
+(check-expect (is-not-divisible-by<=i 9 11) true)
 ;; true 이면 prime number 이다.
 
 ;; prime? : number -> boolean
 (define (prime? n)
   (is-not-divisible-by<=i (ceiling (/ n 2)) n))
+
 ;; test
-(prime? 11) ;; true
-(prime? 28) ;; false
+(check-expect (prime? 11) true)
+(check-expect (prime? 28) false)
 
 ;; ex 11.5.1
 ;; add : Number Number -> Number
@@ -395,27 +418,50 @@
 (= (exponent 2 3) 9)   ;; => 3^2
 (= (exponent 5 3) 243) ;; => 3^5
 
+(cons 1 (cons 2 empty))
+
+(cons (cons 'a empty) empty)
+
 ;; ex 11.5.4
-;; 이거 맞는거야???
-;; 0 => empty
-;; 3 => (cons (cons (cons 1 empty) empty) empty)
-;; 8 => (cons (cons (cons (cons (cons (cons (cons (cons 1 empty) empty) empty)
+
+;; 0 => 'a
+;; 3 => (cons (cons (cons 'a empty) empty) empty)
+;; 8 => (cons (cons (cons (cons (cons (cons (cons (cons 'a empty) empty) empty)
 ;;                               empty) empty) empty) empty) empty)
-;; addDL : Number Number => Deep-List
-;(define (addDL n m)
-;  (cond
-;    [(zero? n) 1]
-;    [else
-;     (cons (addDL (sub1 n) m) empty)]))
+
+(define dl2 (cons (cons 'a empty) empty))
+(define dl3 (cons (cons (cons 'a empty) empty) empty))
+
+(check-expect (addDL dl2 dl3)
+              (cons (cons (cons (cons (cons 'a empty) empty) empty) empty) empty))
 
 (define (addDL n m)
   (cond
-    [(and (zero? n) (zero? m)) 1]
-    [(zero? n) (cons (addDL n (sub1 m)) empty)]
-    [(zero? m) (cons (addDL (sub1 n) m) empty)]
-    [else (cons (cons (addDL (sub1 n) (sub1 m)) empty) empty)]))
+    [(symbol? n) m]
+    [else (add1-dl (addDL (sub1-dl n) m))]))
 
-(addDL 1 1) ;; (cons 1 empty) + (cons 1 empty) => (cons (cons 1 empty) empty)
-(addDL 2 3) ;; (cons (cons 1 empty) empty) + (cons (cons (cons 1 empty) empty) empty)
+(define (add1-dl a-dl)
+  (cons a-dl empty))
+
+(check-expect (add1-dl dl2)
+              (cons (cons (cons 'a empty) empty) empty))
+
+(define (sub1-dl a-dl)
+  (cond
+    [(symbol? a-dl) (error 'sub1-dl "Invalid deep-list")]
+    [else (first a-dl)]))
+
+(check-expect (sub1-dl dl2)
+              (cons 'a empty))
+(check-error (sub1-dl 'a))
+
+     
+;    [(and (zero? n) (zero? m)) 1]
+;    [(zero? n) (cons (addDL n (sub1 m)) empty)]
+;    [(zero? m) (cons (addDL (sub1 n) m) empty)]
+;    [else (cons (cons (addDL (sub1 n) (sub1 m)) empty) empty)]))
+
+;; (addDL 1 1) ;; (cons 1 empty) + (cons 1 empty) => (cons (cons 1 empty) empty)
+;; (addDL 2 3) ;; (cons (cons 1 empty) empty) + (cons (cons (cons 1 empty) empty) empty)
             ;; (cons (cons (cons (cons (cons 1 empty) empty) empty) empty) empty)
 ;; 뭔가 이상하다!!!

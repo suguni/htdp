@@ -153,12 +153,18 @@
 
 ;; search-sorted : number list-of-numbers -> boolean
 ;; list-of-numbers must be sorted.
+;(define (search-sorted n alon)
+;  (cond
+;    [(or (empty? alon)
+;         (< (first alon) n)) false]
+;    [else
+;     (or (= (first alon) n) (search-sorted n (rest alon)))]))
 (define (search-sorted n alon)
   (cond
-    [(or (empty? alon)
-         (< (first alon) n)) false]
-    [else
-     (or (= (first alon) n) (search-sorted n (rest alon)))]))
+    [(empty? alon) false]
+    [(= (first alon) n) true]
+    [(< (first alon) n) false]
+    [(> (first alon) n) (search-sorted n (rest alon))]))
 
 ;; test
 (check-expect (search-sorted 10 empty) false)
@@ -200,7 +206,10 @@
 
 ;; ex 12.3.1
 
-;; add-at-end : posn polygon -> polygon
+(check-expect (add-at-end 'p1 (cons 'p2 empty))
+              (cons 'p2 (cons 'p1 empty)))
+
+;; add-at-end : posn polygon -> list-of-posns
 (define (add-at-end p a-poly)
   (cond
     [(empty? (rest a-poly)) (cons (first a-poly) (cons p empty))]
@@ -236,10 +245,14 @@
   (connect-dots-3 (first a-poly) a-poly))
 
 ;; test
-; (start 100 100)
-; (draw-polygon-3 sample-triangle)
+(start 100 100)
+(draw-polygon-3 sample-triangle)
 
 ;; ex 12.4.1
+
+;list-of-words 는 다음 중 하나.
+;1. empty
+;2. (cons w low), w는 word 구조체, low는 list-of-words
 
 ; A list-of-words is either
 ;    (cons w empty) where w is a word, or
@@ -303,7 +316,7 @@
 
 ;; test
 (check-expect (insert-everywhere/in-a-word 'd empty)
-              (cons (cons 'd empty) empty))
+              (list (cons 'd empty)))
 
 (check-expect (insert-everywhere/in-a-word 'd (cons 'e empty))
               (list (cons 'd (cons 'e empty))   ; de

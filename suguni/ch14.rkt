@@ -208,7 +208,7 @@
 ;
 ;= true
 
-;; ex 14.1.4
+;; ex 14.1.3
 ;; count-persons : ftn -> number
 (define (count-persons a-ftree)
   (cond
@@ -228,7 +228,16 @@
 (define (average-age a-ftree current-year)
   (cond
     [(empty? a-ftree) 0]
-    [else (/ (sum-age a-ftree current-year) (count-persons a-ftree))]))
+    [else
+     (/ (total-age a-ftree current-year) (count-persons a-ftree))]))
+
+(define (total-age a-ftree current-year)
+  (cond
+    [(empty? a-ftree) 0]
+    [else
+     (+ (- current-year (child-date a-ftree))
+        (total-age (child-father a-ftree) current-year)
+        (total-age (child-mother a-ftree) current-year))]))
 
 ; Ages
 ; Gustav : 23
@@ -341,10 +350,12 @@
 (define (search-bt n bt)
   (cond
     [(false? bt) false]
-    [(= n (node-ssn bt)) (node-name bt)]
-    [(contains-bt n (node-left bt)) (search-bt n (node-left bt))]
-    [(contains-bt n (node-right bt)) (search-bt n (node-right bt))]
-    [else false]))
+    [else
+     (cond
+       [(= n (node-ssn bt)) (node-name bt)]
+       [(contains-bt n (node-left bt)) (search-bt n (node-left bt))]
+       [(contains-bt n (node-right bt)) (search-bt n (node-right bt))]
+       [else false])]))
 ;; left, right에서 찾을때는 비효율적.
 ;; left, right를 대상으로 search-bt 한 후 결과에 따라(false or node)
 ;; 반환하도록 하면 검색양이 줄어들 텐데, 아직 let이 없어서...
@@ -386,9 +397,11 @@
 (define (search-bst n bst)
   (cond
     [(false? bst) false]
-    [(= n (node-ssn bst)) (node-name bst)]
-    [(> n (node-ssn bst)) (search-bst n (node-right bst))]
-    [else (search-bst n (node-left bst))])) ;; (< n (node-ssn bst))
+    [else
+     (cond
+       [(= n (node-ssn bst)) (node-name bst)]
+       [(> n (node-ssn bst)) (search-bst n (node-right bst))]
+       [else (search-bst n (node-left bst))])])) ;; (< n (node-ssn bst))
 
 ;; tests
 (check-expect (search-bst 77 tree-A) 'g)
@@ -399,15 +412,17 @@
 (define (create-bst bst soc pn)
   (cond
     [(false? bst) (make-node soc pn false false)]
-    [(> soc (node-ssn bst)) (make-node (node-ssn bst) 
-                                       (node-name bst) 
-                                       (node-left bst)
-                                       (create-bst (node-right bst) soc pn))]
-    [(< soc (node-ssn bst)) (make-node (node-ssn bst) 
-                                       (node-name bst) 
-                                       (create-bst (node-left bst) soc pn)
-                                       (node-right bst))]
-    [else (error "Invalid SSN Number")]))
+    [else
+     (cond
+       [(> soc (node-ssn bst)) (make-node (node-ssn bst) 
+                                          (node-name bst) 
+                                          (node-left bst)
+                                          (create-bst (node-right bst) soc pn))]
+       [(< soc (node-ssn bst)) (make-node (node-ssn bst) 
+                                          (node-name bst) 
+                                          (create-bst (node-left bst) soc pn)
+                                          (node-right bst))]
+       [else (error "Invalid SSN Number")])]))
 
 ;; tests
 (check-expect (create-bst false 66 'a) (make-node 66 'a false false))
@@ -425,8 +440,8 @@
                      (create-bst
                       (create-bst false 63 'a)
                       29 'b)
-                     15 'c) 
-                    10 'd) 
+                     15 'c)
+                    10 'd)
                    24 'e)
                   89 'f)
                  77 'g)
@@ -481,10 +496,8 @@
     [(empty? a-wp) 0]
     [(symbol? (first a-wp))
      (cond
-       [(symbol=? (first a-wp) s)
-        (+ 1 (occurs1 (rest a-wp) s))]
-       [else
-        (occurs1 (rest a-wp) s)])]
+       [(symbol=? (first a-wp) s) (+ 1 (occurs1 (rest a-wp) s))]
+       [else (occurs1 (rest a-wp) s)])]
     [else (occurs1 (rest a-wp) s)]))
 
 ;; tests
@@ -551,7 +564,7 @@
     [(symbol? (first a-wp)) (depth (rest a-wp))]
     [else
      (max (+ 1 (depth (first a-wp)))
-          (depth (rest a-wp)))]))
+               (depth (rest a-wp)))]))
 
 ;; why????
 

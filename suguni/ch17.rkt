@@ -255,3 +255,13 @@
 ;; (and (start 200 300) (hangman-list reveal-list draw-next-part))
 
 ;; ex 17.6.3
+
+;; punch-car : employee-number, worked-hours
+;; employee-record : name, employee-number, pay-rate
+
+;; hours->wages2 : list-of-employee-records, list-of-punch-cards -> weekly-wage-for-employee
+;; if employee and punch card are mismatched, function stop with an error message.
+(define (hours->wages2 a-lor a-lop)
+  ...)
+
+;; tests

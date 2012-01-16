@@ -256,12 +256,127 @@
 
 ;; ex 17.6.3
 
-;; punch-car : employee-number, worked-hours
 ;; employee-record : name, employee-number, pay-rate
+;; (define-struct employee (name ssn pay-rate))
+
+;; punch-card : employee-number, worked-hours
+(define-struct punch-card (ssn work-hours))
 
 ;; hours->wages2 : list-of-employee-records, list-of-punch-cards -> weekly-wage-for-employee
 ;; if employee and punch card are mismatched, function stop with an error message.
-(define (hours->wages2 a-lor a-lop)
-  ...)
+(define (hours->wages2 loe lop)
+  (cond
+    [(empty? loe) empty]
+    [else
+     (hours->wages2-sorted (sort-loe-by-ssn loe)
+                           (sort-lop-by-ssn lop))]))
 
+(define (hours->wages2-sorted loe lop)
+  (cond
+    [(empty? loe) empty]
+    [(not (= (employee-ssn (first loe))
+             (punch-card-ssn (first lop)))) (error "hours->wages2-sorted")]
+    [else
+     (cons (* (employee-pay-rate (first loe))
+              (punch-card-work-hours (first lop)))
+           (hours->wages2-sorted (rest loe) (rest lop)))]))
+
+;; sort list of employee-record by ssn
+;; sort-loe-by-ssn : list-of-employ-record -> sorted list-of-employ-record
+(define (sort-loe-by-ssn loe)
+  (cond
+    [(empty? loe) empty]
+    [else
+     (insert-loe-by-ssn (first loe) 
+                        (sort-loe-by-ssn (rest loe)))]))
+
+;; insert empolyee-record to sorted list-of-employee sorted manner
+;; insert-loe-by-ssn : employee-record sorted list-of-employee-reocrd -> sorted list-of-employee-record
+(define (insert-loe-by-ssn emp loe)
+  (cond
+    [(empty? loe) (list emp)]
+    [else
+     (cond
+       [(>= (employee-ssn emp) (employee-ssn (first loe)))
+        (cons emp loe)]
+       [else
+        (cons (first loe)
+              (insert-loe-by-ssn emp (rest loe)))])]))
+
+;; sort list of punch-card by ssn
+;; sort-lop-by-ssn : list-of-punch-cards -> sorted list-of-punch-cards
+(define (sort-lop-by-ssn lop)
+  (cond
+    [(empty? lop) empty]
+    [else
+     (insert-lop-by-ssn (first lop) 
+                        (sort-lop-by-ssn (rest lop)))]))
+
+;; insert punch-card to sorted list-of-punch-cards sorted manner
+;; insert-lop-by-ssn : punch-card list-of-punch-cards(sorted) -> list-of-punch-cards(sorted)
+(define (insert-lop-by-ssn card lop)
+  (cond
+    [(empty? lop) (list card)]
+    [else
+     (cond
+       [(>= (punch-card-ssn card) (punch-card-ssn (first lop)))
+        (cons card lop)]
+       [else
+        (cons (first lop)
+              (insert-lop-by-ssn card (rest lop)))])]))
 ;; tests
+
+;; list of employee-records
+(define loe
+  (list
+   (make-employee 'b 2 5)
+   (make-employee 'a 1 10)
+   (make-employee 'c 3 12)
+   (make-employee 'd 4 16)))
+(define sorted-loe
+  (list
+   (make-employee 'd 4 16)
+   (make-employee 'c 3 12)
+   (make-employee 'b 2 5)
+   (make-employee 'a 1 10)))
+
+;; list of punch-cards
+(define lop
+  (list
+   (make-punch-card 4 40)
+   (make-punch-card 3 48)
+   (make-punch-card 1 36)
+   (make-punch-card 2 23)))
+(define sorted-lop
+  (list
+   (make-punch-card 4 40)
+   (make-punch-card 3 48)
+   (make-punch-card 2 23)
+   (make-punch-card 1 36)))
+
+(check-expect (hours->wages2-sorted sorted-loe sorted-lop)
+              (list (* 16 40)   ;; 'd 4
+                    (* 12 48)   ;; 'c 3
+                    (* 5 23)    ;; 'b 2
+                    (* 10 36))) ;; 'a 1
+
+(check-expect (hours->wages2 loe lop)
+                (list (* 16 40)     ;; 'd 4
+                      (* 12 48)     ;; 'c 3
+                      (* 5 23)      ;; 'b 2
+                      (* 10 36)))   ;; 'a 1
+
+(check-expect (insert-loe-by-ssn
+               (make-employee 'c 3 12)
+               (list
+                (make-employee 'd 4 16)
+                (make-employee 'b 2 5)
+                (make-employee 'a 1 10)))
+              sorted-loe)
+              
+(check-expect (sort-loe-by-ssn loe) sorted-loe)
+(check-expect (sort-lop-by-ssn lop) sorted-lop)
+
+;; 흐흐... 정렬 먼저하라고 해서 했는데 코드 중복이 많다.
+
+;; ex 17.6.4

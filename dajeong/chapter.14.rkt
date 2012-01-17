@@ -32,7 +32,7 @@
 ;blue-eyed-ancester? : ftn->boolean
 ; a-ftree에 눈 색깔 필드에 'blue가 있는 child 구조체가 존재하는지 검사
 (define (blue-eyed-ancester? a-ftree)
-  (cond
+  (cond 
     [(empty? a-ftree) false]
     [else
      (cond
@@ -89,12 +89,73 @@
               (contains-bt n (node-right a-bt)))]))
 
 ;;ex.14.2.2
-;(define (search-bt n a-bt)
-;  (cond
-;    [(false? a-bt) false]
-;    [(= n (node-ssn a-bt)) (node-name a-bt)]
-;    [else
+(define (search-bt n a-bt)
+  (cond
+    [(false? a-bt) false]
+    [(= n (node-ssn a-bt)) (node-name a-bt)]
+    [(contains-bt n (node-left a-bt)) ...]
+    [(contains-bt n (node-right a-bt)) ...]
+    [else false]))
 
 ;ex.14.2.3
+(define (inorder a-bt)
+  (cond
+    [(false? a-bt) false]
+    [else (append (inorder (node-left a-bt)) (list (node-name a-bt)) (inorder (node-right a-bt)))]))
+
+;ex.14.2.4
+(define (search-bst n a-bst)
+  (cond
+    [(false? a-bst) false]
+    [(= n (node-ssn a-bst)) (node-name a-bst)]
+    [(< n (node-ssn a-bst)) (search-bst n (node-left a-bst))]
+    [(> n (node-ssn a-bst)) (search-bst n (node-right a-bst))]))
+ 
+;ex.14.2.5
+(define (create-bst b n s)
+  (cond
+    [(false? b) (make-node n s false false)]
+    [(< n (node-ssn b)) (make-node (node-ssn b) 
+                                   (node-name b)
+                                   (create-bst (node-left b) n s)
+                                   false)]
+    [(> n (node-ssn b)) (make-node (node-ssn b)
+                                   (node-name b)
+                                   false
+                                   (create-bst (node-right b) n s))]))
+
+;ex.14.2.6
+;(define (create-bst-from-list a-list name)
+;  (cond
+;    [(empty? a-list) false]
+;    [else
+;     (create-bst (create-bst (rest a-list
 
 
+;chapter 14.3
+;웹페이지(WP)는 다음 세 가지 중 하나다.
+;1. empty
+;2. (cons s wp): s(단어)는기호 wp는 웹페이지 
+;3. (cons ewp wp): ewp와 wp는 웹페이지
+
+(define (size a-wp)
+  (cond
+    [(empty? a-wp) 0]
+    [(symbol? (first a-wp)) (+ 1 (size (rest a-wp)))]
+    [else (+ (first a-wp) (rest a-wp))]))
+
+;;ex.14.3.1
+
+;;ex.14.3.2
+(define (occur1 a-wp s)
+  (cond
+    [(empty? a-wp) 0]
+    [(symbol? (first a-wp))
+     (cond
+       [(symbol=? (first a-wp) s) (+ 1 (occur1 (rest a-wp) s))]
+       [else (occur1 (rest a-wp) s)])]
+    [else (occur1 (rest a-wp) s)]))
+
+;;chapter 14.4
+(define-struct add (left right))
+(define-struct mul (left right))

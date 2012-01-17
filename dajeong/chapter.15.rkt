@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname chpater.15) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname chapter.15) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
 ;;chapter 15.1
 (define-struct parent (children name date eyes))
 
@@ -116,7 +116,7 @@
 ;  ... (fun-children (parent-children a-parent)) ...)
 
 ;(define (fun-children loc)
-;  (cond
+
 ;    [(empty? loc) ...]
 ;    [else ... (fun-parent (first loc)) ... (fun-children (rest loc)) ...]))
 
@@ -133,4 +133,9 @@
 ;; 2. (cons s p): s는 기호이고, p는 웹 문서다.
 ;; 3. (cons w p): w는 웹 페이지이고, p는 웹 문서다.
 ;; ex.15.3.1
+
+
+;; ex.15.3.2
+;; wp-to-file : wp -> list
+(define (wp-to-file a-wp)
 

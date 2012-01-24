@@ -380,3 +380,253 @@
 ;; 흐흐... 정렬 먼저하라고 해서 했는데 코드 중복이 많다.
 
 ;; ex 17.6.4
+;; value : list-of-coefficient, list-of-variable's-values -> number
+;; 일차 다항식의 계수 리스트와 변수 값 리스트를 받아 계산한다.
+(define (value loc lov)
+  (cond
+    [(empty? loc) 0]
+    [else
+     (+ (* (first loc) (first lov))
+        (value (rest loc) (rest lov)))]))
+
+;; tests
+(check-expect (value (list 5 17 3) (list 10 1 2)) 73)
+
+;; ex 17.6.5
+
+(define friends (list 'Louise 'Jane 'Laura 'Dana 'Mary))
+
+;; gift-pick : list-of-names -> list-of-names
+;; 임의로 이름을 배열한 리스트들 중 하나를 선택한다.
+(define (gift-pick names)
+  (random-pick
+   (non-same names (arrangements names))))
+
+;; random-pick : list-of-list-of-names -> list-of-names
+;; list-of-list-of-names 중에서 무작위로 하나를 선택한다.
+(define (random-pick lons)
+  (get (random (length lons)) lons))
+
+(define (get n lons)
+  (cond
+    [(zero? n) (first lons)]
+    [else
+     (get (- n 1) (rest lons))]))
+
+;; tests???
+;; (random-pick friends)
+
+;; non-same : list-of-names list-of-list-of-names -> list-of-list-of-names
+;; list-of-list-of-names에서 list-of-names을 제외한 리스트를 반환한다.
+(define (non-same names lons)
+  (cond
+    [(empty? lons) empty]
+    [else
+     (cond
+       [(equal? names (first lons))
+        (non-same names (rest lons))]
+       [else
+        (cons (first lons)
+              (non-same names (rest lons)))])]))
+;; equal? 사용해도 되나???
+
+;; tests
+(check-expect (non-same 'a (list 'a 'b 'c 'd)) (list 'b 'c 'd))
+(check-expect (non-same (list 'a) (list '(a) '(b) '(c) '(d))) (list '(b) '(c) '(d)))
+
+;; arrangement : list-of-names -> list-of-list-of-names
+;; list-of-names를 모든 경우의 수로 재배열한 list-of-list-of-names를 반환한다.
+;; ex 12.4.2 code
+(define (arrangements a-word)
+  (cond
+    [(empty? a-word) (cons empty empty)]
+    [else
+     (insert-everywhere/in-all-words (first a-word)
+                                     (arrangements (rest a-word)))]))
+(define (insert-everywhere/in-all-words c low)
+  (cond
+    [(empty? low) empty]
+    [else (append (insert-everywhere/in-a-word c (first low))
+                  (insert-everywhere/in-all-words c (rest low)))]))
+(define (insert-everywhere/in-a-word c word)
+  (cond
+    [(empty? word) (list (cons c empty))]
+    [else
+     (cons (append (list c (first word)) (rest word))
+           (insert-first/in-all-words (first word) (insert-everywhere/in-a-word c (rest word))))]))
+(define (insert-first/in-all-words c low)
+  (cond
+    [(empty? low) empty]
+    [else
+     (cons (cons c (first low))
+           (insert-first/in-all-words c (rest low)))]))
+
+;; ex 17.6.6
+;; DNAprefix : list-of-symbols, list-of-symbols -> boolean
+;; 첫 번째 리스트(패턴)이 두 번째 리스트(검색 문자열)의 접두사인 경우 true, 아니면 false
+(define (DNAprefix pattern target)
+  (cond
+    [(empty? pattern) true]
+    [(empty? target) false]
+    [(symbol=? (first pattern) (first target)) (DNAprefix (rest pattern) (rest target))]
+    [else false]))
+
+;; 1st version
+;(cond
+;  [(and (empty? pattern) (empty? target)) true]
+;  [(empty? pattern) true]
+;  [(empty? target) false]
+;  [else
+;   (cond
+;     [(symbol=? (first pattern) (first target))
+;      (DNAprefix (rest pattern) (rest target))]
+;     [else false])])
+
+;; tests
+(check-expect (DNAprefix (list 'a 't) (list 'a 't 'c)) true)
+(check-expect (DNAprefix (list 'a 't) (list 'a)) false)
+(check-expect (DNAprefix (list 'a 't) (list 'a 't)) true)
+(check-expect (DNAprefix (list 'a 'c 'g 't) (list 'a 'g)) false)
+(check-expect (DNAprefix (list 'a 'a 'c 'c) (list 'a 'c)) false)
+
+;; DNAprefix2 : list-of-symbols, list-of-symbols -> boolean or symbol
+;; 1.패턴이 검색 문자열의 접두사인 경우 검색 문자열에서 접두사를 제외한 나머지 부분의 첫 글자
+;; 2.패턴과 검색 문자열이 동일하다면 true
+;; 3.패턴이 검색 문자열의 접두사가 아니면 false
+;; 4.패턴의 길이가 문자열의 길이보다 길다면 false
+(define (DNAprefix2 pattern target)
+  (cond
+    [(empty? pattern)
+     (cond
+       [(empty? target) true]   ;; case 1
+       [else (first target)])]  ;; case 2
+    [(empty? target) false]     ;; case 4
+    [else
+     (cond
+       [(symbol=? (first pattern) (first target)) (DNAprefix2 (rest pattern) (rest target))]
+       [else false])]))         ;; case 3
+
+;; tests
+(check-expect (DNAprefix2 (list 'a 't) (list 'a 't 'c)) 'c)
+(check-expect (DNAprefix2 (list 'a 't) (list 'a)) false)
+(check-expect (DNAprefix2 (list 'a 't) (list 'a 't)) true)
+
+;; ch17.7
+
+;; ex 14.4.1
+(define-struct add (left right))
+(define-struct mul (left right))
+
+; scheme-expression은 다음 중 한 가지 이다.
+; 1. Number
+; 2. Symbol
+; 3. (make-add l r)
+; 4. (make-mul l r)
+;    3, 4에서 l과 r은 Scheme 표현이다.
+
+;(+ 10 -10)
+;(make-add 10 -10)
+;
+;(+ (* 20 3) 33)
+;(make-add (make-mul 20 3) 33)
+;
+;(* 3.14 (* r r))
+;(make-mul 3.14 (make-mul 'r 'r))
+;
+;(+ (* 9/5 c) 32)
+;(make-add (make-mul 9/5 'c) 32)
+;
+;(+ (* 3.14 (* o o)) (* 3.14 (* i i)))
+;(make-add (make-mul 3.14 (make-mul 'o 'o)) (make-mul 3.14 (make-mul 'i 'i)))
+
+;; numeric? : scheme-exp -> boolean
+(define (numeric? s-exp)
+  (cond
+    [(number? s-exp) true]
+    [(symbol? s-exp) false]
+    [(add? s-exp) (and (numeric? (add-left s-exp))
+                       (numeric? (add-right s-exp)))]
+    [(mul? s-exp) (and (numeric? (mul-left s-exp))
+                       (numeric? (mul-right s-exp)))]
+    [else (error "Invalid scheme expression")]))
+
+;; ex 14.4.3
+; numeric-scheme-expression은 다음 중 한 가지 이다.
+; 1. Number
+; 2. (make-add l r)
+; 3. (make-mul l r)
+;    2, 3에서 l과 r은 numeric-scheme-exp 표현이다.
+
+;; evaluate-expression : numeric-scheme-expression -> number
+(define (evaluate-expression ns-exp)
+  (cond
+    [(number? ns-exp) ns-exp]
+    [(add? ns-exp) (+ (evaluate-expression (add-left ns-exp))
+                      (evaluate-expression (add-right ns-exp)))]
+    [(mul? ns-exp) (* (evaluate-expression (mul-left ns-exp))
+                      (evaluate-expression (mul-right ns-exp)))]
+    [else
+     (error "Invalid numeric-scheme-expression" ns-exp)]))
+
+;; subst : symbol number scheme-expression -> numeric-scheme-expression
+(define (subst v n s-exp)
+  (cond
+    [(number? s-exp) s-exp]
+    [(symbol? s-exp)
+     (cond
+       [(symbol=? s-exp v) n]
+       [else s-exp])]
+    [(add? s-exp)
+     (make-add (subst v n (add-left s-exp))
+               (subst v n (add-right s-exp)))]
+    [(mul? s-exp)
+     (make-mul (subst v n (mul-left s-exp))
+               (subst v n (mul-right s-exp)))]
+    [else
+     (error "Invalid scheme-expression" s-exp)]))
+
+;; ex 17.7.1
+(define-struct fn (name exp))
+;; name : symbol, exp : scheme-expression
+
+; scheme-expression은 다음 중 한 가지 이다.
+; 1. Number
+; 2. Symbol
+; 3. (make-add l r)
+; 4. (make-mul l r)
+; 5. (make-fn name exp)
+;    3, 4에서 l과 r은 scheme-expression이다.
+;    5에서 name은 symbol, exp는 scheme-expression이다.
+
+;; ex 17.7.2
+(define-struct def (name argument body))
+;; name, argument : symbol
+;; body : scheme-expression
+
+;; scheme-function-definition은 다음과 같다.
+;; (make-def n a b)
+;; 여기서,
+;;  n은 함수 이름으로 symbol,
+;;  a는 매개변수 이름으로 symbol,
+;;  b는 함수 구현으로 scheme-expression 이다.
+
+(define (f x) (+ 3 x))
+(make-def 'f 'x (make-add 3 'x))
+
+(define (g x) (* 3 x))
+(make-def 'g 'x (make-mul 3 'x))
+
+(define (h u) (f (* 2 u)))
+(make-def 'h 'u (make-fn 'f (make-mul 2 'u)))
+
+(define (i v) (+ (* v v) (* v v)))
+(make-def 'i 'v (make-add (make-mul 'v 'v) (make-mul 'v 'v)))
+
+(define (k w) (+ (h w) (i w)))
+(make-def 'k 'w (make-add (make-fn 'h 'w) (make-fn 'i 'w)))
+
+;; ex 17.7.3
+;; evaluate-with-one-def : ???
+
+;; ex 17.7.4
+;; evaluate-with-defs : ???

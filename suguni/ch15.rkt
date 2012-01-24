@@ -169,7 +169,7 @@
        [(symbol=? (parent-eyes p) 'blue) 0]
        [else (+ 1 (apply min (filter number? (how-far-removed-children (parent-children p)))))])]
     [else false]))
-
+;; 자식들 중 blue eye인 게 있으면 그 how-far-removed를 반환, 전부 없으면 false로 생각하고 풀어보는게 좋을듯.
 ;; apply, min, filter...???
 
 ;; tests

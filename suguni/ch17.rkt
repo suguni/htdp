@@ -630,3 +630,147 @@
 
 ;; ex 17.7.4
 ;; evaluate-with-defs : ???
+
+;; p296. 17.8
+
+;; list1=? : list-of-numbers, list-of-numbers -> boolean
+(define (list1=? lon1 lon2)
+  (cond
+    [(and (empty? lon1) (empty? lon2)) true]
+    [(and (cons? lon1) (empty? lon2)) false]
+    [(and (empty? lon1) (cons? lon2)) false]
+    [(and (cons? lon1) (cons? lon2))
+     (and (= (first lon1) (first lon2))
+          (list1=? (rest lon1) (rest lon2)))]))
+
+;; list2=? : list-of-numbers, list-of-numbers -> boolean
+(define (list2=? lon1 lon2)
+  (cond
+    [(empty? lon1) (empty? lon2)]
+    [(cons? lon1)
+     (and (cons? lon2)
+          (and (= (first lon1) (first lon2))
+               (list2=? (rest lon1) (rest lon2))))]))
+
+;; ex 17.8.1
+;; test list1=?
+(check-expect (list1=? empty empty) true)
+(check-expect (list1=? empty (cons 1 empty)) false)
+(check-expect (list1=? (cons 1 empty) empty) false)
+(check-expect (list1=? (cons 1 (cons 2 (cons 3 empty))) 
+                       (cons 1 (cons 2 (cons 3 empty))))
+              true)
+(check-expect (list1=? (cons 1 (cons 2 (cons 3 empty))) 
+                       (cons 1 (cons 3 empty)))
+              false)
+;; test list2=?
+(check-expect (list2=? empty empty) true)
+(check-expect (list2=? empty (cons 1 empty)) false)
+(check-expect (list2=? (cons 1 empty) empty) false)
+(check-expect (list2=? (cons 1 (cons 2 (cons 3 empty))) 
+                       (cons 1 (cons 2 (cons 3 empty))))
+              true)
+(check-expect (list2=? (cons 1 (cons 2 (cons 3 empty))) 
+                       (cons 1 (cons 3 empty)))
+              false)
+
+;; ex 17.8.2
+;; list3=? : list-of-numbers, list-of-numbers -> boolean
+(define (list3=? lon1 lon2)
+  (cond
+    [(or (and (cons? lon1) (empty? lon2))
+         (and (empty? lon1) (cons? lon2))) false]
+    [else
+     (or (and (empty? lon1) (empty? lon2))
+         (and (= (first lon1) (first lon2))
+              (list3=? (rest lon1) (rest lon2))))]))
+
+;; test list3=?
+(check-expect (list3=? empty empty) true)
+(check-expect (list3=? empty (cons 1 empty)) false)
+(check-expect (list3=? (cons 1 empty) empty) false)
+(check-expect (list3=? (cons 1 (cons 2 (cons 3 empty))) 
+                       (cons 1 (cons 2 (cons 3 empty))))
+              true)
+(check-expect (list3=? (cons 1 (cons 2 (cons 3 empty))) 
+                       (cons 1 (cons 3 empty)))
+              false)
+
+;; ex 17.8.3
+;; sym-list=? : list-of-symbols, list-of-symbols -> boolean
+(define (sym-list=? los1 los2)
+  (cond
+    [(or (and (cons? los1) (empty? los2))
+         (and (empty? los1) (cons? los2))) false]
+    [else
+     (or (and (empty? los1) (empty? los2))
+         (and (symbol=? (first los1) (first los2))
+              (sym-list=? (rest los1) (rest los2))))]))
+
+;; test sym-list=?
+(check-expect (sym-list=? empty empty) true)
+(check-expect (sym-list=? empty (cons 'a empty)) false)
+(check-expect (sym-list=? (cons 'a empty) empty) false)
+(check-expect (sym-list=? (cons 'a (cons 'b (cons 'c empty))) 
+                          (cons 'a (cons 'b (cons 'c empty))))
+              true)
+(check-expect (sym-list=? (cons 'a (cons 'b (cons 'c empty))) 
+                          (cons 'a (cons 'c empty)))
+              false)
+
+;; ex 17.8.4
+;; contains-same-numbers : list-of-numbers, list-of-numbers -> boolean
+;; apply sort & list=?
+(define list=? list1=?)
+(define (contains-same-numbers lon1 lon2)
+  (list=? (sort-numbers lon1)
+          (sort-numbers lon2)))
+
+;; test
+(check-expect (contains-same-numbers (list 1 2 3) (list 3 2 1)) true)
+;; 순서가 동일한 경우 list=?와 같은 결과
+(check-expect (contains-same-numbers empty empty) true)
+(check-expect (contains-same-numbers empty (cons 1 empty)) false)
+(check-expect (contains-same-numbers (cons 1 empty) empty) false)
+(check-expect (contains-same-numbers (list 1 2 3) (list 1 2 3)) true)
+(check-expect (contains-same-numbers (list 1 2 3) (list 1 3)) false)
+
+;; sort-numbers : list-of-numbers -> list-of-numbers
+(define (sort-numbers lon)
+  (cond
+    [(empty? lon) empty]
+    [else
+     (insert-numbers (first lon)
+                     (sort-numbers (rest lon)))]))
+
+;; insert-numbers : number list-of-numbers(sorted) -> list-of-numbers
+(define (insert-numbers n lon)
+  (cond
+    [(empty? lon) (list n)]
+    [else
+     (cond
+       [(>= n (first lon)) (cons n lon)]
+       [else
+        (cons (first lon) (insert-numbers n (rest lon)))])]))
+
+;; ex 17.8.5
+;; list-equal? : list-of-atoms list-of-atoms -> boolean
+(define (list-equal=? loa1 loa2)
+  (cond
+    [(or (and (cons? loa1) (empty? loa2))
+         (and (empty? loa1) (cons? loa2))) false]
+    [else
+     (or (and (empty? loa1) (empty? loa2))
+         (and (equal=? (first loa1) (first loa2))
+              (list-equal=? (rest loa1) (rest loa2))))]))
+
+(define (equal=? atom1 atom2)
+  (or
+   (and (number? atom1) (number? atom2) (= atom1 atom2))
+   (and (boolean? atom1) (boolean? atom2) (boolean=? atom1 atom2))
+   (and (symbol? atom1) (symbol? atom2) (symbol=? atom1 atom2))))
+
+;; test
+(check-expect (list-equal=? (list 1 'a true) (list 1 'a true)) true)
+(check-expect (list-equal=? (list 1 'a true) (list 2 'a false)) false)
+

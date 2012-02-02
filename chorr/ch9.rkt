@@ -73,8 +73,8 @@ list-of-2-symbol은 다음과 같다.
 ;; contains-2-doll? : list-of-2-symbol -> boolean
 (define (contains-2-doll? a-list-of-2-symbol)
   (cond
-    [(equal? (first a-list-of-2-symbol) 'doll) true]
-    [(equal? (first (rest a-list-of-2-symbol)) 'doll) true]
+    [(symbol=? (first a-list-of-2-symbol) 'doll) true]
+    [(symbol=? (first (rest a-list-of-2-symbol)) 'doll) true]
     [else false]))
 
 (check-expect (contains-2-doll? (cons 'dog (cons 'doll empty))) true)
@@ -172,6 +172,7 @@ list-of-2-symbol은 다음과 같다.
 ;; 리스트 데이터 입력을 보장한다는 가정이 있다면 별다른 차이가 없다.
 
 ;; ex 9.5.3
+;; dollar-store? : list-of-nums -> boolean
 (define (dollar-store? a-list-of-nums)
   (cond
     [(empty? a-list-of-nums) true]

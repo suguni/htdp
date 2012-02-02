@@ -61,7 +61,7 @@
   (cond
     [(or (empty? alon) (> (first alon) n)) false]
     [(= (first alon) n) true]
-    [else (search n (rest alon))]))
+    [else (search-sorted n (rest alon))]))
 
 (check-expect (search-sorted 3 (cons 1 (cons 3 (cons 5 empty)))) true)
 (check-expect (search-sorted 4 (cons 1 (cons 3 (cons 5 empty)))) false)
@@ -98,10 +98,10 @@
 (define (draw-polygon-type-1 a-poly)
   (connect-dots (add-at-end (first a-poly) a-poly)))
 
-;; add-at-end : posn polygon -> polygon
+;; add-at-end : posn polygon -> list-of-posn
 (define (add-at-end p a-poly)
   (cond
-    [(empty? a-poly) (cons p empty)]
+    [(empty? (rest a-poly)) (cons (first a-poly) (cons p empty))]
     [else (cons (first a-poly) (add-at-end p (rest a-poly)))]))
 
 (check-expect (add-at-end (make-posn 1 1) poly1)
@@ -118,7 +118,7 @@
      (draw-solid-line (first a-poly) last-posn 'RED)]
     [else 
      (and (draw-solid-line (first a-poly) (second a-poly) 'RED)
-          (connect-dots (rest a-poly)))]))
+          (connect-dots-type-2 (rest a-poly)))]))
 
 ;; draw-polygon-type-2 : polygon -> true
 (define (draw-polygon-type-2 a-poly)
@@ -137,7 +137,7 @@
 ;; insert-everywhere/in-all-words : ?
 (define (insert-everywhere/in-all-words source target)
   (cond
-    [(empty? target) ...]
+    [(empty? target) empty]
     [else ...]))
 
 (define test-word

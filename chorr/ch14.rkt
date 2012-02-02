@@ -25,8 +25,8 @@
   (cond
     [(empty? a-ftree) false]
     [else (or (symbol=? (child-eyes a-ftree) 'blue)
-              (or (blue-eyed-ancestor? (child-father a-ftree))
-                  (blue-eyed-ancestor? (child-mother a-ftree))))]))
+              (blue-eyed-ancestor? (child-father a-ftree))
+              (blue-eyed-ancestor? (child-mother a-ftree)))]))
 
 ;; ex 14.1.1
 ;; empty, Carl 둘 다 false 결과를 보인다. 
@@ -100,15 +100,15 @@
 
 (define-struct node (ssn name left right))
 
-(define bn1 (make-node 29 'a empty empty))
-(define bn2 (make-node 89 'b empty empty))
+(define bn1 (make-node 29 'a false false))
+(define bn2 (make-node 89 'b false false))
 (define bn3 (make-node 63 'c bn1 bn2))
 
 ;; ex 14.2.1
 ;; contains-bt : number btn -> boolean
 (define (contains-bt n a-btree)
   (cond
-    [(empty? a-btree) false]
+    [(false? a-btree) false]
     [else (or (= n (node-ssn a-btree))
               (contains-bt n (node-left a-btree))
               (contains-bt n (node-right a-btree)))]))
@@ -122,7 +122,7 @@
   (cond 
     [(contains-bt n a-btree)
      (cond
-       [(empty? a-btree) false]
+       [(false? a-btree) false]
        [(= n (node-ssn a-btree)) (node-name a-btree)]
        [(contains-bt n (node-left a-btree)) (search-bt n (node-left a-btree))]
        [(contains-bt n (node-right a-btree)) (search-bt n (node-right a-btree))]
@@ -133,18 +133,18 @@
 ;; inorder : btn -> list-of-ssn
 (define (inorder a-btree)
   (cond
-    [(empty? a-btree) empty]
+    [(false? a-btree) empty]
     [else (append (inorder (node-left a-btree))
                   (list (node-ssn a-btree))
                   (inorder (node-right a-btree)))]))
 
-(define bn-a (make-node 10 'a empty empty))
-(define bn-c (make-node 24 'c empty empty))
-(define bn-f (make-node 77 'f empty empty))
-(define bn-i (make-node 99 'i empty empty))
+(define bn-a (make-node 10 'a false false))
+(define bn-c (make-node 24 'c false false))
+(define bn-f (make-node 77 'f false false))
+(define bn-i (make-node 99 'i false false))
 (define bn-b (make-node 15 'b bn-a bn-c))
-(define bn-d (make-node 29 'd bn-b empty))
-(define bn-h (make-node 95 'h empty bn-i))
+(define bn-d (make-node 29 'd bn-b false))
+(define bn-h (make-node 95 'h false bn-i))
 (define bn-g (make-node 89 'g bn-f bn-h))
 (define bn-e (make-node 63 'e bn-d bn-g))
 (define tree-a bn-e)
@@ -156,12 +156,28 @@
 ;; search-bst : number btn -> number(symbol)
 (define (search-bst n a-btree)
   (cond
-    [(empty? a-btree) false]
-    [(= n (node-ssn a-btree)) (node-name a-btree)]
-    [(> n (node-ssn a-btree)) (search-bst n (node-right a-btree))]
-    [(< n (node-ssn a-btree)) (search-bst n (node-left a-btree))]))
+    [(false? a-btree) false]
+    [else
+     (cond
+       [(= n (node-ssn a-btree)) (node-name a-btree)]
+       [(> n (node-ssn a-btree)) (search-bst n (node-right a-btree))]
+       [(< n (node-ssn a-btree)) (search-bst n (node-left a-btree))])]))
 
 (check-expect (search-bst 15 tree-a) 'b)
 (check-expect (search-bst 63 tree-a) 'e)
 (check-expect (search-bst 100 tree-a) false)
+
+;; ex 14.2.5
+(define (create-bst b n s)
+  (cond
+    [(false? b) (make-node n s false false)]
+    [else
+     (cond
+       [(> n (node-ssn b)) 
+        (make-node (node-ssn b) (node-name b) (node-left b) (create-bst (node-right b) n s))]
+       [(< n (node-ssn b)) 
+        (make-node (node-ssn b) (node-name b) (create-bst (node-left b) n s) (node-right b))])]))
+
+(check-expect (create-bst (create-bst false 66 'a) 53 'b)
+              (make-node 66 'a (make-node 53 'b false false) false))
 

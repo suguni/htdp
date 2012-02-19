@@ -303,12 +303,15 @@
 
 ;; ex 15.3.3
 ;; occurs : symbol wp -> boolean
+;; 기호(s)가 웹페이지(a-wp)에 나타나는지 검사. 내장된 웹페이지도 함께 검사
 (define (occurs s a-wp)
   (or 
    (symbol=? s (wp-header a-wp))
    (occurs-body s (wp-body a-wp))))
 
 ;; occurs-body : symbol document -> boolean
+;; 기호(s)가 웹문서(wd)에 나타나는지 검사. 내장된 웹페이지도 함께 검사.
+;; 여기서 웹문서는 웹페이지의 body이다.
 (define (occurs-body s wd)
   (cond
     [(empty? wd) false]
@@ -325,12 +328,14 @@
 
 ;; ex 15.3.4 -- too complex. right???
 ;; find : symbol wp -> list-of-headers or false
+;; 기호(s)가 웹페이지(wp)의 body나 내장된 웹페이지에 나타나지 않으면 false
+;; 만일 기호가 한 번 이상 나타나면, 해방 기호가 존재하는 웹페이지의 header들을 리스트로 묶어 출력
 (define (find s a-wp)
   (cond
     [(occurs? s a-wp) (find-body s (wp-header a-wp) (wp-body a-wp))]
     [else false]))
 
-;; find-body : symbol document -> list-of-headers
+;; find-body : symbol symbol document -> list-of-headers
 (define (find-body s h wd)
   (cond
     [(empty? wd) empty]

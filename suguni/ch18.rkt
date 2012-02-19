@@ -345,3 +345,130 @@
 (check-expect (last-occurrence 'Steve alos) false)
 (check-expect (last-occurrence 'Wen alos) (make-star 'Wen 'guitar))
 
+;; ex 18.1.11
+(check-expect (last-occurrence 'Matt (list (make-star 'Matt 'violin)
+                                           (make-star 'Matt 'radio)))
+              (make-star 'Matt 'radio))
+;; 2번 발생 (stepper로 확인)
+
+;; ex 18.1.12
+;; maxi : non-empty-lon->number
+;; alon내에서 가장 큰 수를 찾는다.
+(define (maxi alon)
+  (cond
+    [(empty? (rest alon)) (first alon)]
+    [else (cond
+            [(> (first alon) (maxi (rest alon))) (first alon)]
+            [else (maxi (rest alon))])]))
+;; test
+(check-expect (maxi (list 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)) 20)
+
+;; maxi-2 : non-empty-long -> number
+;; maxi의 local 적용 버전
+(define (maxi-2 alon)
+  (cond
+    [(empty? (rest alon)) (first alon)]
+    [else (local
+            ((define r (maxi-2 (rest alon))))
+            (cond
+              [(> (first alon) r) (first alon)]
+              [else r]))]))
+;; test
+(check-expect (maxi-2 (list 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)) 20)
+;; (maxi-2 (rest alon))을 한번만 실행하면 되므로 속도가 개선되었다.
+
+;; ex 18.1.13
+;; to-blue-eyed-ancestor : ftn -> path or false
+;; a-ftn 트리로부터 눈이 파란 조상까지의 경로를 계산한다.
+(define (to-blue-eyed-ancestor a-ftn)
+  (cond
+    [(empty? a-ftn) false]
+    [else
+     (local
+       ((define f (to-blue-eyed-ancestor (child-father a-ftn)))
+        (define m (to-blue-eyed-ancestor (child-mother a-ftn))))
+       (cond
+         [(symbol=? (child-eyes a-ftn) 'blue) empty]
+         [(list? f) (cons 'father f)]
+         [(list? m) (cons 'mother m)]
+         [else false]))]))
+
+;; Data set
+(define-struct child (father mother name date eyes))
+
+;; Oldest Generation:
+(define Carl (make-child empty empty 'Carl 1926 'green))
+(define Bettina (make-child empty empty 'Bettina 1926 'green))
+
+;; Middle Generation:
+(define Adam (make-child Carl Bettina 'Adam 1950 'yellow))
+(define Dave (make-child Carl Bettina 'Dave 1955 'black))
+(define Eva (make-child Carl Bettina 'Eva 1965 'blue))
+(define Fred (make-child empty empty 'Fred 1966 'pink))
+
+;; Youngest Generation: 
+(define Gustav (make-child Fred Eva 'Gustav 1988 'brown))
+
+;; test
+(check-expect (to-blue-eyed-ancestor Eva) empty)
+(check-expect (to-blue-eyed-ancestor Gustav) (list 'mother))
+(check-expect (to-blue-eyed-ancestor Adam) false)
+(define Evan (make-child empty empty 'Evan 1987 'red))
+(define Hal (make-child Gustav Evan 'Hal 1988 'hazel))
+(check-expect (to-blue-eyed-ancestor Hal) (list 'father 'mother))
+
+;; ex 18.1.14
+;; 연습문제 15.3.4를 다시 풀어보기
+
+;; p323
+;; mult10 : list-of-digits->list-of-numbers
+;; alod의 각 숫자에 (expt 10 p)를 곱하여 수 리스트를 만든다.
+;; (expt 10 p)에서 p는 뒤에 나오는 숫자의 개수
+;(define (mult10 alod)
+;  (cond
+;    [(empty? alod) empty]
+;    [else (cons (* (expt 10 (length (rest alod))) (first alod))
+;                (mult10 (rest alod)))]))
+;; test
+(check-expect (mult10 (list 1 2 3)) (list 100 20 3))
+
+;; mult10 : list-of-digits->list-of-numbers
+;; local 적용 버전
+(define (mult10 alod)
+  (cond
+    [(empty? alod) empty]
+    [else (local
+            ((define a-digit (first alod))
+             (define the-rest (rest alod))
+             (define p (length the-rest)))
+            (cons (* (expt 10 p) a-digit)
+                  (mult10 the-rest)))]))
+;; 목적
+;; 계산 중간값에 이름을 부여하여 명확히 하고자 함
+;; 반복된 표현에 이름 부여하여 두번 수행하지 않게 하기
+
+;; ex 18.1.15
+;; extract1 : inventory -> inventory
+;; an-inv의 모든 항목 중 1달러 미만의 항목들로 이루어진 inventory 리스트를 작성한다.
+(define-struct ir (name price))
+;(define (extract1 an-inv)
+;  (cond
+;    [(empty? an-inv) empty]
+;    [else
+;     (cond
+;       [(<= (ir-price (first an-inv)) 1.00)
+;        (cons (first an-inv) (extract1 (rest an-inv)))]
+;       [else (extract1 (rest an-inv))])]))
+
+(define (extract1 an-inv)
+  (cond
+    [(empty? an-inv) empty]
+    [else (local
+            ((define inv (first an-inv))
+             (define ext1 (extract1 (rest an-inv))))
+            (cond
+              [(<= (ir-price inv) 1.00) (cons inv ext1)]
+              [else ext1]))]))
+
+(check-expect (extract1 (list (make-ir 'a 1.1) (make-ir 'b 0.9) (make-ir 'c 0.8)))
+              (list (make-ir 'b 0.9) (make-ir 'c 0.8)))

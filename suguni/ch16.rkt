@@ -123,29 +123,30 @@
 ;; test
 (check-expect (du-dir model3-TS) 207)
 
-;; 디렉터리의 크기를 1로 하여 용량 계산
+;; 디렉터리 and file의 크기를 1로 하여 용량 계산
 ;; du-dir2 : dir -> number
 (define (du-dir2 d)
-  (+ 1
-     (du-dir2-dirs (dir-dirs d))
+  (+ (du-dir2-dirs (dir-dirs d))
      (du-dir2-files (dir-files d))))
 
 ;; du-dir-dirs : dirs -> number
 (define (du-dir2-dirs dirs)
   (cond
     [(empty? dirs) 0]
-    [else (+ (du-dir2 (first dirs))
+    [else (+ 1
+             (du-dir2 (first dirs))
              (du-dir2-dirs (rest dirs)))]))
      
 ;; du-dir-files : files -> number
 (define (du-dir2-files files)
   (cond
     [(empty? files) 0]
-    [else (+ (file-size (first files))
+    [else (+ 1
+             (file-size (first files))
              (du-dir2-files (rest files)))]))
 
 ;; test
-(check-expect (du-dir2 model3-TS) 212)
+(check-expect (du-dir2 model3-TS) 218)
 
 ;; ex 16.3.4
 ;; find? : dir symbol -> boolean

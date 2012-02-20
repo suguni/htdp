@@ -212,14 +212,19 @@
               (list '_ 'l 'l))
 
 ;; reveal-one : letter status-letter letter -> status-letter
+;(define (reveal-one chosen status guess)
+;  (cond
+;    [(symbol=? status '_)
+;     (cond
+;       [(symbol=? chosen guess) guess]
+;       [else '_])]
+;    [else status]))
+
 (define (reveal-one chosen status guess)
   (cond
-    [(symbol=? status '_)
-     (cond
-       [(symbol=? chosen guess) guess]
-       [else '_])]
+    [(symbol=? chosen guess) guess]
     [else status]))
-
+  
 ;; tests
 (check-expect (reveal-one 'a '_ 'c) '_)
 (check-expect (reveal-one 'a '_ 'a) 'a)
@@ -425,7 +430,7 @@
      (cond
        [(equal? names (first lons))
         (non-same names (rest lons))]
-       [else
+       [else ;; ERROR!!!
         (cons (first lons)
               (non-same names (rest lons)))])]))
 ;; equal? 사용해도 되나???

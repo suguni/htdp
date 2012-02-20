@@ -472,3 +472,30 @@
 
 (check-expect (extract1 (list (make-ir 'a 1.1) (make-ir 'b 0.9) (make-ir 'c 0.8)))
               (list (make-ir 'b 0.9) (make-ir 'c 0.8)))
+
+;; ex 18.2.1
+;(define (p1 x y) 
+;  (+ (* x y)
+;     (+ (* 2 x)
+;	(+ (* 2 y) 22))))
+
+(define (p1 a y) 
+  (+ (* a y)
+     (+ (* 2 a)
+	(+ (* 2 y) 22))))
+
+(define (p2 x)
+  (+ (* 55 x) (+ x 11)))
+
+;(define (p3 x)
+;  (+ (p1 x 0)
+;     (+ (p1 x 1) (p2 x))))
+
+(define (p3 b)
+  (+ (p1 b 0)
+     (+ (p1 b 1) (p2 b))))
+
+;; ex 18.2.2 - book
+
+;; ex 18.2.3 - 무한 스트림이다. 우변은 계산할 수 없다.
+;; 실제 해보면 에러. 좌편 x는 함수 정의가 아니므로 우변의 x는 global scope에 있어야 하는데 없다.

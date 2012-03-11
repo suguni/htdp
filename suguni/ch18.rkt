@@ -380,18 +380,32 @@
 ;; ex 18.1.13
 ;; to-blue-eyed-ancestor : ftn -> path or false
 ;; a-ftn 트리로부터 눈이 파란 조상까지의 경로를 계산한다.
+;(define (to-blue-eyed-ancestor a-ftn)
+;  (cond
+;    [(empty? a-ftn) false]
+;    [else
+;     (local
+;       ((define f (to-blue-eyed-ancestor (child-father a-ftn)))
+;        (define m (to-blue-eyed-ancestor (child-mother a-ftn))))
+;       (cond
+;         [(symbol=? (child-eyes a-ftn) 'blue) empty]
+;         [(list? f) (cons 'father f)]
+;         [(list? m) (cons 'mother m)]
+;         [else false]))]))
+
 (define (to-blue-eyed-ancestor a-ftn)
   (cond
     [(empty? a-ftn) false]
+    [(symbol=? (child-eyes a-ftn) 'blue) empty]
     [else
      (local
        ((define f (to-blue-eyed-ancestor (child-father a-ftn)))
         (define m (to-blue-eyed-ancestor (child-mother a-ftn))))
        (cond
-         [(symbol=? (child-eyes a-ftn) 'blue) empty]
          [(list? f) (cons 'father f)]
          [(list? m) (cons 'mother m)]
          [else false]))]))
+
 
 ;; Data set
 (define-struct child (father mother name date eyes))
@@ -499,3 +513,4 @@
 
 ;; ex 18.2.3 - 무한 스트림이다. 우변은 계산할 수 없다.
 ;; 실제 해보면 에러. 좌편 x는 함수 정의가 아니므로 우변의 x는 global scope에 있어야 하는데 없다.
+;; lazy racket에서 가능함.

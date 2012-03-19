@@ -255,7 +255,7 @@ empty
      (+ (first lon)
         (* 10 (convert (rest lon))))]))
 'ex-9.5.5-convert-test
-(= 4321 (convert (cons 1 (cons 2 (cons 3 (cons 4 empty))))))
+(check-expect (convert (cons 1 (cons 2 (cons 3 (cons 4 empty))))) 4321)
 
 ;; check-guess-for-list : list-of-numbers, number -> symbol
 ;; return symbol is one of 'TooSmall, 'Perfect, 'TooLarge

@@ -98,3 +98,184 @@
 ;(create-window (list (list a-text-field a-message)
 ;                     (list (make-button "Copy Now" echo-message))))
 
+
+;; ex 22.3.1
+
+;; from ex 9.5.5
+;; convert : list-of-numbers -> number
+(define (convert lon)
+  (cond
+    [(empty? lon) 0]
+    [else
+     (+ (first lon)
+        (* 10 (convert (rest lon))))]))
+'ex-9.5.5-convert-test
+(check-expect (convert (cons 1 (cons 2 (cons 3 (cons 4 empty))))) 4321)
+
+;; check-guess-for-list : list-of-numbers, number -> symbol
+;; return symbol is one of 'TooSmall, 'Perfect, 'TooLarge
+(define (check-guess-for-list guesses target)
+  (cond
+    [(< (convert guesses) target) 'TooSmall]
+    [(= (convert guesses) target) 'Perfect]
+    [(> (convert guesses) target) 'TooLarge]))
+
+;; from ex 11.3.1
+(define (random-n-m n m)
+  (+ (random (- m n)) n))
+;; n 이상 m 미만에 있는 임의의 자연수를 출력한다.
+
+;; Model:
+;; build-number : (listof digit) -> number
+;; ex) (build-number (list 1 2 3)) = 123
+(define (build-number x)
+  (local ((define (p a b) (+ a (* 10 b))))
+    (foldl p 0 x)))
+
+;; tests
+(check-expect (build-number (list 1 2 3)) 123)
+
+;; 자리수
+;; (define DIGIT-NUM 5)
+
+;; 정답
+;; (define answer (random (expt 10 DIGIT-NUM)))
+
+(define (check-guess guess target)
+  (cond
+    [(> guess target) "Too Large"]
+    [(< guess target) "Too Small"]
+    [else "Perfect"]))
+
+;; View:
+(define DIGITS (build-list 10 number->string))
+
+;(define digit-choosers
+;  (local ((define (builder i) (make-choice DIGITS)))
+;    (build-list DIGIT-NUM builder)))
+
+;(define a-msg
+;  (make-message "Welcome"))
+
+;; Controller:
+;(define (check-call-back b)
+;  (draw-message a-msg
+;                (check-guess
+;                 (build-number (map choice-index digit-choosers))
+;                 answer)))
+
+;; game start
+(define (start-game n)
+  (local ((define answer (random (expt 10 n)))
+          (define a-msg
+            (make-message "Welcome"))
+          (define digit-choosers
+            (local ((define (builder i) (make-choice DIGITS)))
+              (build-list n builder)))
+          (define (check-call-back b)
+            (draw-message a-msg
+                          (check-guess
+                           (build-number (map choice-index digit-choosers))
+                           answer))))
+    (create-window
+     (list
+      (append digit-choosers (list a-msg))
+      (list (make-button "Check Guess" check-call-back))))))
+    
+;; (start-game 3)
+
+;; ex 22.3.2
+
+(define-struct phone (name number))
+
+(define DB (list (make-phone "steve" 01042062688)
+                 (make-phone "bizen" 01048470337)))
+
+(define (assf p? seq)
+  (cond
+    [(empty? seq) false]
+    [(p? (first seq)) (first seq)]
+    [else (assf p? (rest seq))]))
+
+(define (start-search-phone i)
+  (local ((define (search-callback b)
+            (local ((define name (text-contents a-text))
+                    (define pno (string->number name)))
+              (draw-message a-msg
+                            (cond
+                              [(number? pno) (search-db-number pno)]
+                              [else (number->string (search-db-name name))]))))
+          (define (search-db-name k)
+            (local ((define (p? p) (string=? (phone-name p) k))
+                    (define r (assf p? DB)))
+              (cond
+                [(phone? r) (phone-number r)]
+                [else "Not Found"])))
+          (define (search-db-number k)
+            (local ((define (p? p) (= (phone-number p) k))
+                    (define r (assf p? DB)))
+              (cond
+                [(phone? r) (phone-name r)]
+                [else "Not Found"])))
+          (define a-text (make-text "Name: "))
+          (define a-msg (make-message "000-0000-0000"))
+          (define a-btn (make-button "Search" search-callback)))
+    (create-window
+     (list (list a-text a-btn)
+           (list (make-message "Number:") a-msg)))))
+
+;; ex 22.3.3
+
+(define (cell->string c)
+  (cond
+    [(number? c) (number->string c)]
+    [(symbol? c) (symbol->string c)]))
+
+(define (pad->gui title gui-table)
+  (local ((define (cb msg)
+             (draw-message a-msg msg))
+          (define a-msg (make-message "N")))
+    (append
+     (list
+      (list (make-message title))
+      (list a-msg))
+     (map (lambda (seq)
+            (map (lambda (cell)
+                   (let ((label (cell->string cell)))
+                     (make-button label
+                                  (lambda (e) (cb label)))))
+                 seq)) gui-table))))
+  
+;; tests
+(define pad
+  '((1 2 3)
+    (4 5 6)
+    (7 8 9)
+    (\# 0 *)))
+
+(define pad2
+  '((1 2 3 +)
+    (4 5 6 -)
+    (7 8 9 *)
+    (0 = \. /)))
+
+;; 테스트 불가
+;(check-expect (pad->gui "Virtual Phone" pad)
+;              (list (list (make-message "Virtual Phone"))
+;                    (list (make-message "N"))
+;                    (list (make-button "1" cb) (make-button "2" cb) (make-button "3" cb))
+;                    (list (make-button "4" cb) (make-button "5" cb) (make-button "6" cb))
+;                    (list (make-button "7" cb) (make-button "8" cb) (make-button "9" cb))
+;                    (list (make-button "#" cb) (make-button "0" cb) (make-button "*" cb))))
+;
+;(check-expect (pad->gui "Calculator" pad2)
+;              (list (list (make-message "Calculator"))
+;                    (list (make-message "N"))
+;                    (list (make-button "1" cb) (make-button "2" cb) (make-button "3" cb) (make-button "+" cb))
+;                    (list (make-button "4" cb) (make-button "5" cb) (make-button "6" cb) (make-button "-" cb))
+;                    (list (make-button "7" cb) (make-button "8" cb) (make-button "9" cb) (make-button "*" cb))
+;                    (list (make-button "0" cb) (make-button "=" cb) (make-button "." cb) (make-button "/" cb))))
+
+;; create window
+; (create-window (pad->gui "Virtual Phone" pad))
+; (create-window (pad->gui "Calculator" pad2))

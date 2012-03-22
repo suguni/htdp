@@ -74,3 +74,54 @@
 ;; project : (listof symbol) ((listof symbol) -> symbol) -> (listof symbol)
 
 
+
+;; filter1 : (X number -> boolean) (listof X) number -> (listof X)
+(define (filter1 rel-op alon t)
+  (cond
+    [(empty? alon) empty]
+    [(rel-op (first alon) t) 
+     (cons (first alon)
+           (filter1 rel-op (rest alon) t))]
+    [else
+     (filter1 rel-op (rest alon) t)]))
+
+(define-struct ir (name price))
+
+;; find : (listof IR) symbol  ->  (listof IR)
+(define (find aloir t)
+  (filter1 eq-ir? aloir t))
+
+;; eq-ir? : IR symbol  ->  boolean
+(define (eq-ir? ir p)
+  (symbol=? (ir-name ir) p))
+
+
+
+;; ex 20.2.3
+;; exclude-car : (listof IR) -> (listof IR)
+(define (exclude-car aloir)
+  (filter1 not-eq-ir? aloir 'car))
+
+;; not-eq-ir? : IR symbol -> boolean
+(define (not-eq-ir? ir p)
+  (not (symbol=? (ir-name ir) p)))
+
+;; 계약은 요렇게 - filter1 : (IR symbol -> boolean) (listof IR) symbol -> (listof IR)
+
+(define ir1 (list (make-ir 'doll 8) (make-ir 'doll 13) (make-ir 'car 99) (make-ir 'robot 12)))
+(check-expect (exclude-car ir1)
+              (list (make-ir 'doll 8) (make-ir 'doll 13) (make-ir 'robot 12)))
+
+
+;; ex 20.2.4
+;1. 리스트와 함수(리스트 상의 두 항목을 입력받아 불린 값을 출력)를 입력받아 수 리스트를 출력하는 sort
+;; sort : (listof number) (number number -> boolean) -> (listof number)
+;; sort : (listof X) (X X -> boolean) -> (listof X)
+
+;2. 함수(리스트 항목들에서 X를 출력)와 리스트를 입력받아 X 리스트를 출력하는 map
+;; map : (number -> number) (listof number) -> (listof number)
+;; map : (LI -> X) (listof X) -> (listof X)
+
+;3. 리스트를 항목으로 갖는 리스트와 함수(리스트로부터 X를 출력)를 입력받아 X 리스트를 출력하는 project
+;; project : (listof symbol) ((listof symbol) -> symbol) -> (listof symbol)
+;; project : (listof X) ((listof X) -> X) -> (listof X)
